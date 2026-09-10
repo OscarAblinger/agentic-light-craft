@@ -1,39 +1,40 @@
-# Byte-compiled / optimized / DLL files
-*.pyc
-__pycache__/
-*.class
-
-# Virtual environments
-venv/
-env/
-ENV/
-.venv/
-
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# Build and deployment files
-dist/
+### Gradle ###
+.gradle
 build/
-*.egg-info/
-*.pyc
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/**/build/
 
-# Environment variables
-.env
-.env.local
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/**/out/
 
-# OS files
+.run/
+
+### Eclipse ###
+.apt_generated
+.classpath
+.eclipse/
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/**/bin/
+
+### VS Code ###
+.vscode/
+
+### Mac OS ###
 .DS_Store
-Thumbs.db
 
-# Logs
-*.log
-logs/
-
-# Temporary files
-tmp/
-temp/
+### Minecraft Modding ###
+run/
+!**/src/**/run/
+**/src/generated/**/.cache/
+repo/
+!**/src/**/repo/

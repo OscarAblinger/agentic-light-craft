@@ -1,24 +1,31 @@
-# Vibe Light Craft Project
+# LightCraft
 
-A workspace project for [describe your project here].
+A Minecraft mod for NeoForge 26.1.x.
 
-## Getting Started
+## Project stack
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/vibe-light-craft.git
-   ```
+- **Minecraft:** 26.1.2
+- **Mod loader:** NeoForge 26.1.2.107
+- **Java:** JDK 25
+- **Build system:** Gradle 9.2.1
 
-2. Install dependencies (if any):
-   ```bash
-   pip install -r requirements.txt  # if you have one
-   ```
+## Getting started
 
-3. Run the project:
-   ```bash
-   python main.py
-   ```
+Import the project into IntelliJ IDEA with the MinecraftDev plugin.
+
+Common Gradle tasks:
+
+```bash
+./gradlew build      # Build the mod jar
+./gradlew runClient  # Run the Minecraft client
+./gradlew runServer  # Run a dedicated server
+./gradlew runData    # Generate data-driven resources
+```
+
+## Project decisions
+
+See [research/0_basic_setup.md](research/0_basic_setup.md) for the source-of-truth project configuration.
 
 ## License
 
-[Add your license here, e.g., MIT]
+[Add your license here]
