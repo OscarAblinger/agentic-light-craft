@@ -1,5 +1,13 @@
 {
   "itemGroup.lightcraft": "LightCraft Tab",
+  "itemGroup.lightcraft.lapis_lux": "Lapis Lux",
+  
+  "block.lightcraft.lapis_lux_ore": "Lapis Lux Ore",
+  "item.lightcraft.raw_lapis_lux": "Raw Lapis Lux",
+  "block.lightcraft.raw_lapis_lux_block": "Raw Lapis Lux Block",
+  "item.lightcraft.lapis_lux": "Lapis Lux Ingot",
+  "block.lightcraft.lapis_lux_ingot_block": "Lapis Lux Ingot Block",
+  
   "block.lightcraft.example_block": "Example Block",
   "item.lightcraft.example_item": "Example Item",
 

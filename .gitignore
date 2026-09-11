@@ -4,6 +4,10 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/**/build/
 
+### Local Gradle Home ###
+# Required for agents that only have workspace access to still being able to run gradle tasks
+.gradle_home
+
 ### IntelliJ IDEA ###
 .idea/
 *.iws

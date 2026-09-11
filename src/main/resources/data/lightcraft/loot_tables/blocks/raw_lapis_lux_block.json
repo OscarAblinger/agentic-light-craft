@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1.0,
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "weight": 1,
+          "name": "lightcraft:raw_lapis_lux_block"
+        }
+      ]
+    }
+  ],
+  "required": [
+    "#lightcraft:raw_lapis_lux_blocks"
+  ]
+}

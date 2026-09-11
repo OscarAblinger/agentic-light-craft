@@ -1,117 +1,124 @@
 package dev.ablinger.lightcraft;
 
-import org.slf4j.Logger;
-
-import com.mojang.logging.LogUtils;
-
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.food.FoodProperties;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.MapColor;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.registries.DeferredBlock;
-import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(LightCraft.MOD_ID)
 public class LightCraft {
-    // Define mod id in a common place for everything to reference
-    public static final String MOD_ID = "lightcraft";
-    // Directly reference a slf4j logger
-    public static final Logger LOGGER = LogUtils.getLogger();
-    // Create a Deferred Register to hold Blocks which will all be registered under the "lightcraft" namespace
-    public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MOD_ID);
-    // Create a Deferred Register to hold Items which will all be registered under the "lightcraft" namespace
-    public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MOD_ID);
-    // Create a Deferred Register to hold CreativeModeTabs which will all be registered under the "lightcraft" namespace
-    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MOD_ID);
+  // Define mod id in a common place for everything to reference
+  public static final String MOD_ID = "lightcraft";
+  // Directly reference a slf4j logger
+  public static final Logger LOGGER = LoggerFactory.getLogger(LightCraft.class);
 
-    // Creates a new Block with the id "lightcraft:example_block", combining the namespace and path
-    public static final DeferredBlock<Block> EXAMPLE_BLOCK = BLOCKS.registerSimpleBlock("example_block", p -> p.mapColor(MapColor.STONE));
-    // Creates a new BlockItem with the id "lightcraft:example_block", combining the namespace and path
-    public static final DeferredItem<BlockItem> EXAMPLE_BLOCK_ITEM = ITEMS.registerSimpleBlockItem("example_block", EXAMPLE_BLOCK);
+  // Deferred Registers for Blocks and Items
+  public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MOD_ID);
+  public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MOD_ID);
 
-    // Creates a new food item with the id "lightcraft:example_id", nutrition 1 and saturation 2
-    public static final DeferredItem<Item> EXAMPLE_ITEM = ITEMS.registerSimpleItem("example_item", p -> p.food(new FoodProperties.Builder()
-            .alwaysEdible().nutrition(1).saturationModifier(2f).build()));
+  // Lapis Lux Ore Block with multiple variants
+  public static final DeferredBlock<Block> LAPIS_LUX_ORE = BLOCKS.register("lapis_lux_ore", name -> {
+    return new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.GOLD_ORE)
+        .setId(ResourceKey.create(Registries.BLOCK, name)));
+  });
 
-    // Creates a creative tab with the id "lightcraft:example_tab" for the example item, that is placed after the combat tab
-    public static final DeferredHolder<CreativeModeTab, CreativeModeTab> EXAMPLE_TAB = CREATIVE_MODE_TABS.register("example_tab", () -> CreativeModeTab.builder()
-            .title(Component.translatable("itemGroup.lightcraft")) //The language key for the title of your CreativeModeTab
-            .withTabsBefore(CreativeModeTabs.COMBAT)
-            .icon(() -> EXAMPLE_ITEM.get().getDefaultInstance())
-            .displayItems((parameters, output) -> {
-                output.accept(EXAMPLE_ITEM.get());// Add the example item to the tab. For your own tabs, this method is preferred over the event
-            }).build());
+  // Raw Lapis Lux material block (for smelting)
+  public static final DeferredBlock<Block> LAPIS_LUX_RAW_BLOCK = BLOCKS.register("raw_lapis_lux_block", name -> {
+    return new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.GOLD_ORE)
+        .setId(ResourceKey.create(Registries.BLOCK, name)));
+  });
 
-    // The constructor for the mod class is the first code that is run when your mod is loaded.
-    // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
-    public LightCraft(IEventBus modEventBus, ModContainer modContainer) {
-        // Register the commonSetup method for modloading
-        modEventBus.addListener(this::commonSetup);
+  // Lapis Lux Ingot material block
+  public static final DeferredBlock<Block> LAPIS_LUX_INGOT_BLOCK = BLOCKS.register("lapis_lux_ingot_block", name -> {
+    return new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.GOLD_BLOCK)
+        .setId(ResourceKey.create(Registries.BLOCK, name)));
+  });
 
-        // Register the Deferred Register to the mod event bus so blocks get registered
-        BLOCKS.register(modEventBus);
-        // Register the Deferred Register to the mod event bus so items get registered
-        ITEMS.register(modEventBus);
-        // Register the Deferred Register to the mod event bus so tabs get registered
-        CREATIVE_MODE_TABS.register(modEventBus);
+  // Item entries for the ore variants
+  public static final DeferredItem<BlockItem> LAPIS_LUX_ORE_ITEM = ITEMS.register("lapis_lux_ore", name -> {
+    return new BlockItem(LAPIS_LUX_ORE.get(), new Item.Properties()
+        .setId(ResourceKey.create(Registries.ITEM, name)));
+  });
 
-        // Register ourselves for server and other game events we are interested in.
-        // Note that this is necessary if and only if we want *this* class (LightCraft) to respond directly to events.
-        // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
-        NeoForge.EVENT_BUS.register(this);
+  public static final DeferredItem<BlockItem> RAW_LAPIS_LUX_BLOCK_ITEM = ITEMS.register("raw_lapis_lux_block", name -> {
+    return new BlockItem(LAPIS_LUX_RAW_BLOCK.get(), new Item.Properties()
+        .setId(ResourceKey.create(Registries.ITEM, name)));
+  });
 
-        // Register the item to a creative tab
-        modEventBus.addListener(this::addCreative);
+  public static final DeferredItem<BlockItem> LAPIS_LUX_INGOT_BLOCK_ITEM = ITEMS.register("lapis_lux_ingot_block", name -> {
+    return new BlockItem(LAPIS_LUX_INGOT_BLOCK.get(), new Item.Properties()
+        .setId(ResourceKey.create(Registries.ITEM, name)));
+  });
 
-        // Register our mod's ModConfigSpec so that FML can create and load the config file for us
-        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+  // Standalone Raw Lapis Lux item (dropped from ore)
+  public static final DeferredItem<Item> RAW_LAPIS_LUX_ITEM = ITEMS.register("raw_lapis_lux", name -> {
+    return new Item(new Item.Properties()
+        .setId(ResourceKey.create(Registries.ITEM, name))
+        .stacksTo(64));
+  });
+
+  // Standalone Lapis Lux ingot item
+  public static final DeferredItem<Item> LAPIS_LUX_INGOT_ITEM = ITEMS.register("lapis_lux", name -> {
+    return new Item(new Item.Properties()
+        .setId(ResourceKey.create(Registries.ITEM, name))
+        .stacksTo(64));
+  });
+
+  // Register the commonSetup method for modloading
+  public LightCraft(ModContainer container, IEventBus modEventBus) {
+    container.registerConfig(ModConfig.Type.COMMON, Config.SPEC, MOD_ID);
+
+    modEventBus.addListener(this::commonSetup);
+
+    BLOCKS.register(modEventBus);
+    ITEMS.register(modEventBus);
+
+    NeoForge.EVENT_BUS.register(this);
+
+    modEventBus.addListener(this::addCreative);
+  }
+
+  private void commonSetup(FMLCommonSetupEvent event) {
+    LOGGER.info("HELLO FROM COMMON SETUP");
+    LOGGER.info("DIRT BLOCK >> {}", "minecraft:dirt");
+
+    LOGGER.info("{}{}", Config.MAGIC_NUMBER_INTRODUCTION.get(), Config.MAGIC_NUMBER.getAsInt());
+
+    Config.ITEM_STRINGS.get().forEach((item) -> LOGGER.info("ITEM >> {}", item));
+  }
+
+  // Add creative items to their respective tabs
+  private void addCreative(BuildCreativeModeTabContentsEvent event) {
+    // Add lapis lux blocks to building_blocks tab
+    if (event.getTabKey() == net.minecraft.world.item.CreativeModeTabs.BUILDING_BLOCKS) {
+      event.accept(LAPIS_LUX_ORE_ITEM);
+      event.accept(RAW_LAPIS_LUX_BLOCK_ITEM);
+      event.accept(LAPIS_LUX_INGOT_BLOCK_ITEM);
     }
+  }
 
-    private void commonSetup(FMLCommonSetupEvent event) {
-        // Some common setup code
-        LOGGER.info("HELLO FROM COMMON SETUP");
-
-        if (Config.LOG_DIRT_BLOCK.getAsBoolean()) {
-            LOGGER.info("DIRT BLOCK >> {}", BuiltInRegistries.BLOCK.getKey(Blocks.DIRT));
-        }
-
-        LOGGER.info("{}{}", Config.MAGIC_NUMBER_INTRODUCTION.get(), Config.MAGIC_NUMBER.getAsInt());
-
-        Config.ITEM_STRINGS.get().forEach((item) -> LOGGER.info("ITEM >> {}", item));
-    }
-
-    // Add the example block item to the building blocks tab
-    private void addCreative(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
-            event.accept(EXAMPLE_BLOCK_ITEM);
-        }
-    }
-
-    // You can use SubscribeEvent and let the Event Bus discover methods to call
-    @SubscribeEvent
-    public void onServerStarting(ServerStartingEvent event) {
-        // Do something when the server starts
-        LOGGER.info("HELLO from server starting");
-    }
+  // You can use SubscribeEvent and let the Event Bus discover methods to call
+  @SubscribeEvent
+  public void onServerStarting(ServerStartingEvent event) {
+    LOGGER.info("HELLO from server starting");
+  }
 }
