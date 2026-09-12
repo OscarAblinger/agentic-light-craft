@@ -2,26 +2,17 @@
 
 A Minecraft mod for NeoForge 26.1.x.
 
-## Lapis Lux Metal
+## Agentic Approach
 
-This mod adds a new iron-tier metal called "Lapis Lux" (`lightcraft:lapis_lux`) with the following variants:
+I've used this project to try out agentic coding approaches.
+From local LLMs to OpenRouter, I want to try out how modern heavily AI-assisted programming looks like.
 
-### Blocks
-- **`lightcraft:lapis_lux_ore`** - Main ore block, drops 3-5 Raw Lapis Lux when mined
-- **`lightcraft:raw_lapis_lux_block`** - Smeltable raw material block
-- **`lightcraft:lapis_lux_ingot_block`** - Ingot form for storage
+### Why a minecraft mod?
 
-### Items
-- **`lightcraft:raw_lapis_lux`** - Raw material dropped from ore (stacks to 64)
-- **`lightcraft:lapis_lux`** - Smelted ingot (stacks to 64)
-
-### Properties
-- **Mining level:** Iron tier (requires iron pickaxe or better)
-- **XP reward:** 0.7 XP per ore block smelted
-- **Smelting ratio:** 4 Raw Lapis Lux → 1 Lapis Lux ingot
-
-> **Note:** Textures currently use gold textures as placeholders and will be replaced later.
-
+On the one hand, because I had the idea for it for a long time and never the time to implement it.
+On the other hand, because it seems niche enough to find out how AI deals with something less common than simply
+creating a website (which I've seen it do hundreds of times before), while at the same time also offering a lot
+of documentation and one of the most common programming languages.
 
 ## Project stack
 
@@ -47,6 +38,3 @@ Common Gradle tasks:
 
 See [research/0_basic_setup.md](research/0_basic_setup.md) for the source-of-truth project configuration.
 
-## License
-
-[Add your license here]
