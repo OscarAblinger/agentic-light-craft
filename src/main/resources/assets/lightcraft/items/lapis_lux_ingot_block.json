@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "lightcraft:block/lapis_lux_ingot_block"
+    "model": "lightcraft:item/lapis_lux_ingot_block"
   }
 }
