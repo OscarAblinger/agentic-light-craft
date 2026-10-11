@@ -113,6 +113,8 @@ public class LightCraft {
       event.accept(LAPIS_LUX_ORE_ITEM);
       event.accept(RAW_LAPIS_LUX_BLOCK_ITEM);
       event.accept(LAPIS_LUX_INGOT_BLOCK_ITEM);
+      event.accept(RAW_LAPIS_LUX_ITEM);
+      event.accept(LAPIS_LUX_INGOT_ITEM);
     }
   }
 

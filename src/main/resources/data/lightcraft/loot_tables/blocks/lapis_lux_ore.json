@@ -2,6 +2,30 @@
   "type": "minecraft:block",
   "pools": [
     {
+      "rolls": 1.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "lightcraft:lapis_lux_ore"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:match_tool",
+          "predicate": {
+            "enchantments": [
+              {
+                "enchantment": "minecraft:silk_touch",
+                "levels": {
+                  "min": 1
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
       "rolls": 3.0,
       "bonus_rolls": 0.0,
       "entries": [
@@ -25,8 +49,5 @@
         }
       ]
     }
-  ],
-  "required": [
-    "#lightcraft:lapis_lux_ore"
   ]
 }

@@ -12,8 +12,5 @@
         }
       ]
     }
-  ],
-  "required": [
-    "#lightcraft:lapis_lux_ingot_blocks"
   ]
 }
