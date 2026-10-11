@@ -1,0 +1,1 @@
+Superseded by [item-texture-fix.md](1789387202117-item-texture-fix.md).
