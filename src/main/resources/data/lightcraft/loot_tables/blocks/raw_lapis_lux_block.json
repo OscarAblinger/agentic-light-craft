@@ -12,8 +12,5 @@
         }
       ]
     }
-  ],
-  "required": [
-    "#lightcraft:raw_lapis_lux_blocks"
   ]
 }
