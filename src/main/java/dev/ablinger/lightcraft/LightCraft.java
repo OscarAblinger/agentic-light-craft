@@ -80,19 +80,25 @@ public class LightCraft {
   });
 
   // Item entries for the ore variants
+  // NOTE: useBlockDescriptionPrefix() makes the BlockItem resolve its display name from
+  // "block.lightcraft.<id>" instead of the Item default "item.lightcraft.<id>", matching
+  // vanilla's Items.registerBlock(...). Without it the game shows the raw translation key.
   public static final DeferredItem<BlockItem> LAPIS_LUX_ORE_ITEM = ITEMS.register("lapis_lux_ore", name -> {
     return new BlockItem(LAPIS_LUX_ORE.get(), new Item.Properties()
-        .setId(ResourceKey.create(Registries.ITEM, name)));
+        .setId(ResourceKey.create(Registries.ITEM, name))
+        .useBlockDescriptionPrefix());
   });
 
   public static final DeferredItem<BlockItem> RAW_LAPIS_LUX_BLOCK_ITEM = ITEMS.register("raw_lapis_lux_block", name -> {
     return new BlockItem(LAPIS_LUX_RAW_BLOCK.get(), new Item.Properties()
-        .setId(ResourceKey.create(Registries.ITEM, name)));
+        .setId(ResourceKey.create(Registries.ITEM, name))
+        .useBlockDescriptionPrefix());
   });
 
   public static final DeferredItem<BlockItem> LAPIS_LUX_INGOT_BLOCK_ITEM = ITEMS.register("lapis_lux_ingot_block", name -> {
     return new BlockItem(LAPIS_LUX_INGOT_BLOCK.get(), new Item.Properties()
-        .setId(ResourceKey.create(Registries.ITEM, name)));
+        .setId(ResourceKey.create(Registries.ITEM, name))
+        .useBlockDescriptionPrefix());
   });
 
   // Standalone Raw Lapis Lux item (dropped from ore)
@@ -104,6 +110,13 @@ public class LightCraft {
 
   // Standalone Lapis Lux ingot item
   public static final DeferredItem<Item> LAPIS_LUX_INGOT_ITEM = ITEMS.register("lapis_lux", name -> {
+    return new Item(new Item.Properties()
+        .setId(ResourceKey.create(Registries.ITEM, name))
+        .stacksTo(64));
+  });
+
+  // Lapis Lux nugget (smallest unit; nine of these make an ingot)
+  public static final DeferredItem<Item> LAPIS_LUX_NUGGET_ITEM = ITEMS.register("lapis_lux_nugget", name -> {
     return new Item(new Item.Properties()
         .setId(ResourceKey.create(Registries.ITEM, name))
         .stacksTo(64));
@@ -185,6 +198,7 @@ public class LightCraft {
             output.accept(LAPIS_LUX_INGOT_BLOCK_ITEM);
             output.accept(RAW_LAPIS_LUX_ITEM);
             output.accept(LAPIS_LUX_INGOT_ITEM);
+            output.accept(LAPIS_LUX_NUGGET_ITEM);
             // The luxflower crop and its harvest
             output.accept(LUXFLOWER_SEEDS);
             output.accept(LUXFLOWER_PETAL);

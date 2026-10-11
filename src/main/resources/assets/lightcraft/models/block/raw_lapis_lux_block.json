@@ -1,6 +1,6 @@
 {
   "parent": "block/cube_all",
   "textures": {
-    "all": "block/raw_gold_block"
+    "all": "lightcraft:block/raw_lapis_lux_block"
   }
 }
