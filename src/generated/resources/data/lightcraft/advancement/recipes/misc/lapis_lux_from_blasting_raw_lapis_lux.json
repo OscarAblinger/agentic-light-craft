@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_raw_lapis_lux": {
+      "conditions": {
+        "items": [
+          {
+            "items": "lightcraft:raw_lapis_lux"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "lightcraft:lapis_lux_from_blasting_raw_lapis_lux"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_raw_lapis_lux"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "lightcraft:lapis_lux_from_blasting_raw_lapis_lux"
+    ]
+  }
+}

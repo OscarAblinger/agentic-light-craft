@@ -1,9 +1,0 @@
-{
-  "type": "minecraft:smelting",
-  "ingredient": {
-    "item": "lightcraft:raw_lapis_lux"
-  },
-  "result": "lightcraft:lapis_lux",
-  "experience": 0.7,
-  "cookingtime": 200
-}
