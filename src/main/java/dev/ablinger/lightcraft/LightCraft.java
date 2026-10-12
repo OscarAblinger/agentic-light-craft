@@ -3,6 +3,7 @@ package dev.ablinger.lightcraft;
 import dev.ablinger.lightcraft.crop.LuxflowerBlock;
 import dev.ablinger.lightcraft.crop.LuxflowerBlockEntity;
 import dev.ablinger.lightcraft.crop.PetalBundles;
+import dev.ablinger.lightcraft.data.ModData;
 import dev.ablinger.lightcraft.gametest.LuxflowerGameTests;
 import com.mojang.serialization.Codec;
 import java.util.Locale;
@@ -21,8 +22,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
+import net.minecraft.world.level.material.MapColor;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -56,20 +60,40 @@ public class LightCraft {
   public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MOD_ID);
 
   // Lapis Lux Ore Block with multiple variants
+  // The ore keeps requiresCorrectToolForDrops (inherited from GOLD_ORE) so it
+  // still needs a pickaxe, but strength 0.4F matches netherrack so it mines
+  // quickly. It is NOT in the needs_iron_tool tag, so any pickaxe - wooden
+  // included - can mine and harvest it.
   public static final DeferredBlock<Block> LAPIS_LUX_ORE = BLOCKS.register("lapis_lux_ore", name -> {
     return new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.GOLD_ORE)
+        .strength(0.4F) // mines as fast as netherrack
         .setId(ResourceKey.create(Registries.BLOCK, name)));
   });
 
-  // Raw Lapis Lux material block (for smelting)
+  // Raw Lapis Lux material block (for smelting).
+  //
+  // Built from Properties.of() rather than copying GOLD_ORE/GOLD_BLOCK on
+  // purpose: requiresCorrectToolForDrops() can only ever be SET to true, never
+  // cleared, so copying a block that enables it would make the storage block
+  // drop nothing when punched. Leaving it off means the block drops itself
+  // even when mined by hand (just slower than with a pickaxe, which still
+  // gets the mineable/pickaxe speed bonus from the generated tag).
   public static final DeferredBlock<Block> LAPIS_LUX_RAW_BLOCK = BLOCKS.register("raw_lapis_lux_block", name -> {
-    return new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.GOLD_ORE)
+    return new Block(BlockBehaviour.Properties.of()
+        .mapColor(MapColor.GOLD)
+        .instrument(NoteBlockInstrument.BASEDRUM)
+        .strength(0.4F) // mines as fast as netherrack; drops by hand
         .setId(ResourceKey.create(Registries.BLOCK, name)));
   });
 
-  // Lapis Lux Ingot material block
+  // Lapis Lux Ingot material block. Same hand-drop reasoning as the raw block
+  // above; map color / instrument / sound mirror vanilla gold_block.
   public static final DeferredBlock<Block> LAPIS_LUX_INGOT_BLOCK = BLOCKS.register("lapis_lux_ingot_block", name -> {
-    return new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.GOLD_BLOCK)
+    return new Block(BlockBehaviour.Properties.of()
+        .mapColor(MapColor.GOLD)
+        .instrument(NoteBlockInstrument.BELL)
+        .sound(SoundType.METAL)
+        .strength(0.4F) // mines as fast as netherrack; drops by hand
         .setId(ResourceKey.create(Registries.BLOCK, name)));
   });
 
@@ -226,6 +250,13 @@ public class LightCraft {
     NeoForge.EVENT_BUS.register(this);
 
     modEventBus.addListener(this::registerTooltipAppenders);
+
+    // Data generation: recipes, loot tables and block tags are produced by
+    // the providers in dev.ablinger.lightcraft.data, not hand-authored. Both
+    // event subtypes are registered because NeoForge has two datagen entry
+    // points, each posting only one of them; see ModData for details.
+    modEventBus.addListener(ModData::gatherDataClient);
+    modEventBus.addListener(ModData::gatherDataServer);
   }
 
   private void commonSetup(FMLCommonSetupEvent event) {

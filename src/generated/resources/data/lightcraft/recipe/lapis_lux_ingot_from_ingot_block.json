@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "lightcraft:lapis_lux_ingot_block"
+  ],
+  "result": {
+    "count": 9,
+    "id": "lightcraft:lapis_lux"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_lapis_lux_ingot": {
+      "conditions": {
+        "items": [
+          {
+            "items": "lightcraft:lapis_lux"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "lightcraft:lapis_lux_ingot_block"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_lapis_lux_ingot"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "lightcraft:lapis_lux_ingot_block"
+    ]
+  }
+}
