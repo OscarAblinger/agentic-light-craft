@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:function",
+  "environment": "minecraft:default",
+  "function": "lightcraft:luxflower_seed_drops",
+  "max_ticks": 100,
+  "required": true,
+  "setup_ticks": 0,
+  "structure": "lightcraft:luxflower_test_area",
+  "sky_access": true
+}

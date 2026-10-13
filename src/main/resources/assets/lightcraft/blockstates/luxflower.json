@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "age=0": { "model": "lightcraft:block/luxflower_stage0" },
+    "age=1": { "model": "lightcraft:block/luxflower_stage1" },
+    "age=2": { "model": "lightcraft:block/luxflower_stage2" },
+    "age=3": { "model": "lightcraft:block/luxflower_stage3" },
+    "age=4": { "model": "lightcraft:block/luxflower_stage4" },
+    "age=5": { "model": "lightcraft:block/luxflower_stage5" },
+    "age=6": { "model": "lightcraft:block/luxflower_stage6" },
+    "age=7": { "model": "lightcraft:block/luxflower_stage7" }
+  }
+}
