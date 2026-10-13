@@ -1,11 +1,23 @@
 package dev.ablinger.lightcraft;
 
+import dev.ablinger.lightcraft.crop.LuxflowerBlock;
+import dev.ablinger.lightcraft.crop.LuxflowerBlockEntity;
+import dev.ablinger.lightcraft.gametest.LuxflowerGameTests;
+import com.mojang.serialization.Codec;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -15,6 +27,7 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.RegisterTooltipAppendersEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredItem;
@@ -31,9 +44,11 @@ public class LightCraft {
   // Directly reference a slf4j logger
   public static final Logger LOGGER = LoggerFactory.getLogger(LightCraft.class);
 
-  // Deferred Registers for Blocks and Items
+  // Deferred Registers for Blocks, Items, Block Entities and Data Components
   public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(MOD_ID);
   public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MOD_ID);
+  public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, MOD_ID);
+  public static final DeferredRegister<DataComponentType<?>> DATA_COMPONENT_TYPES = DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, MOD_ID);
 
   // Lapis Lux Ore Block with multiple variants
   public static final DeferredBlock<Block> LAPIS_LUX_ORE = BLOCKS.register("lapis_lux_ore", name -> {
@@ -50,6 +65,12 @@ public class LightCraft {
   // Lapis Lux Ingot material block
   public static final DeferredBlock<Block> LAPIS_LUX_INGOT_BLOCK = BLOCKS.register("lapis_lux_ingot_block", name -> {
     return new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.GOLD_BLOCK)
+        .setId(ResourceKey.create(Registries.BLOCK, name)));
+  });
+
+  // Luxflower crop, grows half as fast as wheat
+  public static final DeferredBlock<LuxflowerBlock> LUXFLOWER = BLOCKS.register("luxflower", name -> {
+    return new LuxflowerBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.WHEAT)
         .setId(ResourceKey.create(Registries.BLOCK, name)));
   });
 
@@ -83,6 +104,38 @@ public class LightCraft {
         .stacksTo(64));
   });
 
+  // Luxflower seeds, doubles as the block item of the luxflower crop like vanilla wheat seeds
+  public static final DeferredItem<BlockItem> LUXFLOWER_SEEDS = ITEMS.register("luxflower_seeds", name -> {
+    return new BlockItem(LUXFLOWER.get(), new Item.Properties()
+        .setId(ResourceKey.create(Registries.ITEM, name))
+        .useItemDescriptionPrefix()
+        .stacksTo(64));
+  });
+
+  // Luxflower petals, the day based harvest of a fully grown crop
+  public static final DeferredItem<Item> LUXFLOWER_PETAL = ITEMS.register("luxflower_petal", name -> {
+    return new Item(new Item.Properties()
+        .setId(ResourceKey.create(Registries.ITEM, name))
+        .stacksTo(64));
+  });
+
+  // Block entity of the luxflower, counting the daybreaks the crop witnessed
+  public static final Supplier<BlockEntityType<LuxflowerBlockEntity>> LUXFLOWER_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register("luxflower",
+      () -> new BlockEntityType<>(LuxflowerBlockEntity::new, false, LUXFLOWER.get()));
+
+  // Metadata of a luxflower seed: how many daybreaks the crop it came from witnessed
+  public static final Supplier<DataComponentType<Integer>> SUNCHARGE = DATA_COMPONENT_TYPES.register("suncharge",
+      () -> DataComponentType.<Integer>builder()
+          .persistent(Codec.INT)
+          .networkSynchronized(ByteBufCodecs.VAR_INT)
+          .build());
+
+  // Game tests of the seed dropping behaviour, see gametest package
+  public static final DeferredRegister<Consumer<GameTestHelper>> TEST_FUNCTIONS = DeferredRegister.create(BuiltInRegistries.TEST_FUNCTION, MOD_ID);
+
+  public static final Supplier<Consumer<GameTestHelper>> LUXFLOWER_SEED_DROPS = TEST_FUNCTIONS.register("luxflower_seed_drops",
+      () -> LuxflowerGameTests::luxflowerSeedDrops);
+
   // Register the commonSetup method for modloading
   public LightCraft(ModContainer container, IEventBus modEventBus) {
     container.registerConfig(ModConfig.Type.COMMON, Config.SPEC, MOD_ID);
@@ -91,10 +144,14 @@ public class LightCraft {
 
     BLOCKS.register(modEventBus);
     ITEMS.register(modEventBus);
+    BLOCK_ENTITY_TYPES.register(modEventBus);
+    DATA_COMPONENT_TYPES.register(modEventBus);
+    TEST_FUNCTIONS.register(modEventBus);
 
     NeoForge.EVENT_BUS.register(this);
 
     modEventBus.addListener(this::addCreative);
+    modEventBus.addListener(this::registerTooltipAppenders);
   }
 
   private void commonSetup(FMLCommonSetupEvent event) {
@@ -116,6 +173,21 @@ public class LightCraft {
       event.accept(RAW_LAPIS_LUX_ITEM);
       event.accept(LAPIS_LUX_INGOT_ITEM);
     }
+    // Add the luxflower seeds to the natural_blocks tab, where vanilla seeds live as well
+    if (event.getTabKey() == net.minecraft.world.item.CreativeModeTabs.NATURAL_BLOCKS) {
+      event.accept(LUXFLOWER_SEEDS);
+      event.accept(LUXFLOWER_PETAL);
+    }
+  }
+
+  // Show how many daybreaks a suncharged seed witnessed in its tooltip
+  private void registerTooltipAppenders(RegisterTooltipAppendersEvent event) {
+    event.registerComponentAppenderAfterAll(SUNCHARGE, (stack, context, display, player, flag, builder) -> {
+      int suncharge = stack.getOrDefault(SUNCHARGE.get(), 0);
+      if (suncharge > 0) {
+        builder.accept(Component.translatable("lightcraft.tooltip.suncharge", suncharge));
+      }
+    });
   }
 
   // You can use SubscribeEvent and let the Event Bus discover methods to call

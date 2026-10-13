@@ -7,6 +7,11 @@
   "block.lightcraft.raw_lapis_lux_block": "Raw Lapis Lux Block",
   "item.lightcraft.lapis_lux": "Lapis Lux Ingot",
   "block.lightcraft.lapis_lux_ingot_block": "Lapis Lux Ingot Block",
+
+  "block.lightcraft.luxflower": "Luxflower",
+  "item.lightcraft.luxflower_seeds": "Luxflower Seeds",
+  "item.lightcraft.luxflower_petal": "Luxflower Petal",
+  "lightcraft.tooltip.suncharge": "Witnessed %s daybreaks",
   
   "block.lightcraft.example_block": "Example Block",
   "item.lightcraft.example_item": "Example Item",

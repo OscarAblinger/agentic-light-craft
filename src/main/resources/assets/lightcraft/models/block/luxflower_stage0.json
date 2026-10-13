@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/crop",
+  "textures": {
+    "crop": "lightcraft:block/luxflower_stage0"
+  }
+}
