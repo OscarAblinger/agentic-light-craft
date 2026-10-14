@@ -12,8 +12,10 @@ import net.minecraft.world.item.ItemStack;
  *
  * <p>A small petal bundle holds 8 petals, every following tier multiplies that by 64.
  * Because normal crafting cannot take stacks of 64 as input, only the small bundle can
- * be crafted for now; the four larger tiers drop straight out of a charged crop and wait
- * for the pressing machine that will compress them by hand.
+ * be crafted up from loose petals; the four larger tiers drop straight out of a charged
+ * crop instead and wait for the pressing machine that will compress them by hand.
+ * Every larger tier can be crafted back down one step at a time, ending at the small
+ * bundle, which unpacks into its eight loose petals.
  */
 public final class PetalBundles {
 
