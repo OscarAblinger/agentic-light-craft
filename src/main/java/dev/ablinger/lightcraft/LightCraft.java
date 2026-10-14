@@ -97,7 +97,9 @@ public class LightCraft {
         .setId(ResourceKey.create(Registries.BLOCK, name)));
   });
 
-  // Luxflower crop, grows half as fast as wheat
+  // Luxflower crop. It grows only in daylight under wheat's light requirement, is fully
+  // grown after one minecraft day on average, and glows faintly from its third growth
+  // stage on - twice as bright when fully grown (see LuxflowerBlock).
   public static final DeferredBlock<LuxflowerBlock> LUXFLOWER = BLOCKS.register("luxflower", name -> {
     return new LuxflowerBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.WHEAT)
         .setId(ResourceKey.create(Registries.BLOCK, name)));
@@ -204,11 +206,14 @@ public class LightCraft {
           .networkSynchronized(ByteBufCodecs.VAR_INT)
           .build());
 
-  // Game tests of the seed dropping behaviour, see gametest package
+  // Game tests of the seed dropping behaviour and glow, see gametest package
   public static final DeferredRegister<Consumer<GameTestHelper>> TEST_FUNCTIONS = DeferredRegister.create(BuiltInRegistries.TEST_FUNCTION, MOD_ID);
 
   public static final Supplier<Consumer<GameTestHelper>> LUXFLOWER_SEED_DROPS = TEST_FUNCTIONS.register("luxflower_seed_drops",
       () -> LuxflowerGameTests::luxflowerSeedDrops);
+
+  public static final Supplier<Consumer<GameTestHelper>> LUXFLOWER_LIGHT_EMISSION = TEST_FUNCTIONS.register("luxflower_light_emission",
+      () -> LuxflowerGameTests::luxflowerLightEmission);
 
   // The mod's own creative tab, holding every block and item of LightCraft
   public static final Supplier<CreativeModeTab> LIGHTCRAFT_TAB = CREATIVE_MODE_TABS.register("lightcraft",

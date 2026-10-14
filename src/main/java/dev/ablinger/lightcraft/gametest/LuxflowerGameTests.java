@@ -18,6 +18,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -26,8 +27,9 @@ import net.minecraft.world.phys.Vec3;
  * Game tests for the suncharge of the luxflower crop.
  *
  * <p>Harvesting always drops the planted seed remembering the witnessed daybreaks as its
- * suncharge, while a fully grown crop additionally drops one petal per witnessed daybreak.
- * A replanted seed continues counting up from the suncharge it remembers.
+ * suncharge, while a fully grown crop additionally drops one base petal plus one petal
+ * per witnessed daybreak. A replanted seed continues counting up from the suncharge it
+ * remembers.
  *
  * <p>All scenarios share a single test function because the minecraft day is a single
  * global world clock that concurrent tests would fight over.
@@ -84,23 +86,25 @@ public final class LuxflowerGameTests {
       harvest(helper, 1);
     });
 
-    // A mature crop that did not cross a day boundary adds no petals either.
+    // A mature crop that did not cross a day boundary still drops its base petal.
     helper.runAfterDelay(10, () -> {
-      assertHarvest(helper, 1, 0, 0);
+      assertHarvest(helper, 1, 0, 1);
       advanceDays(helper, 2);
     });
 
     // The mature crop catches up the two passed daybreaks in its suncharge, then is
-    // harvested, dropping its remembering seed and two petals.
+    // harvested, dropping its remembering seed and three petals: the witnessed
+    // daybreaks plus its base petal.
     helper.runAfterDelay(14, () -> {
       assertSuncharge(helper, 2, 2);
       harvest(helper, 2);
     });
 
-    // A mature crop drops the remembering seed plus one petal per witnessed daybreak.
-    // Replanting that very dropped seed continues the counting from its suncharge.
+    // A mature crop drops the remembering seed plus one base petal and one petal per
+    // witnessed daybreak. Replanting that very dropped seed continues the counting
+    // from its suncharge.
     helper.runAfterDelay(17, () -> {
-      assertHarvest(helper, 2, 2, 2);
+      assertHarvest(helper, 2, 2, 3);
       plantSeed(helper, 3, droppedSeed(helper, 2));
     });
 
@@ -123,23 +127,42 @@ public final class LuxflowerGameTests {
     });
 
     // Fully grown, the remembered suncharge plus three witnessed daybreaks: the seed
-    // remembers that total and the petals drop compressed into bundles plus a remainder.
+    // remembers that total, and the petals - one more than the suncharge, so 104 -
+    // drop compressed into bundles plus a remainder.
     helper.runAfterDelay(27, () -> {
-      assertHarvest(helper, 3, 3, 3);
+      assertHarvest(helper, 3, 3, 4);
       assertPetalBundles(helper, 4, BUNDLE_SUNCHARGE + 3);
       helper.succeed();
     });
   }
 
   /**
+   * Checks the glow of the luxflower: no light in the first two growth stages, a faint
+   * light from the third stage on, and twice that light once the crop is fully grown.
+   */
+  public static void luxflowerLightEmission(GameTestHelper helper) {
+    ServerLevel level = helper.getLevel();
+    BlockPos pos = helper.absolutePos(crop(0));
+    for (int age = 0; age <= LightCraft.LUXFLOWER.get().getMaxAge(); age++) {
+      BlockState state = LightCraft.LUXFLOWER.get().getStateForAge(age);
+      int expectedLight = age < 2 ? 0 : (age >= LightCraft.LUXFLOWER.get().getMaxAge() ? 2 : 1);
+      helper.assertValueEqual(state.getLightEmission(level, pos), expectedLight,
+          "light of growth stage " + (age + 1));
+    }
+    helper.succeed();
+  }
+
+  /**
    * Asserts the harvest of a heavily charged crop: the remembering seed, and its many
-   * petals compressed into small petal bundles plus the loose remainder, so the drop
-   * stays a handful of stacks instead of dozens of petals.
+   * petals - the witnessed daybreaks plus the base petal - compressed into small petal
+   * bundles plus the loose remainder, so the drop stays a handful of stacks instead of
+   * dozens of petals.
    */
   private static void assertPetalBundles(GameTestHelper helper, int scenario, int expectedSuncharge) {
-    int petalBundles = expectedSuncharge / 64;
-    int smallBundles = (expectedSuncharge % 64) / 8;
-    int loosePetals = expectedSuncharge % 8;
+    int petals = expectedSuncharge + 1;
+    int petalBundles = petals / 64;
+    int smallBundles = (petals % 64) / 8;
+    int loosePetals = petals % 8;
     helper.assertItemEntityCountIs(LightCraft.LUXFLOWER_SEEDS.get().asItem(), crop(scenario), 2.0, 1);
     helper.assertValueEqual(droppedSeed(helper, scenario).getOrDefault(LightCraft.SUNCHARGE.get(), 0),
         expectedSuncharge, "suncharge of dropped seed");
@@ -209,8 +232,8 @@ public final class LuxflowerGameTests {
   }
 
   /**
-   * Asserts the harvest of a crop: always the remembering seed, and one petal per
-   * witnessed daybreak if the crop was fully grown.
+   * Asserts the harvest of a crop: always the remembering seed, and the base petal plus
+   * one petal per witnessed daybreak if the crop was fully grown.
    */
   private static void assertHarvest(GameTestHelper helper, int scenario, int expectedSuncharge, int expectedPetals) {
     helper.assertItemEntityCountIs(LightCraft.LUXFLOWER_SEEDS.get().asItem(), crop(scenario), 2.0, 1);
