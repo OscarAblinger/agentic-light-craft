@@ -1,0 +1,51 @@
+# LightCraft texture category: MACHINES  (tier: basic)
+# ============================================================================
+# A category file does not define colors. It selects which ramps from
+# ../palette.txt a category may use and sets the rules for how it draws.
+# A category may only RESTRICT the palette - never invent colors.
+#
+# Directive lines (read by TextureCheck --category):
+#   name:         category name (label only)
+#   tier:         basic | advanced (advanced adds extra ramps, not a new palette)
+#   allow:        comma-separated ramps from palette.txt this category may use
+#   opaque-only:  true = no partial transparency allowed
+#   max-colors:   soft limit on distinct colors per texture
+# All other lines are comments and describe human-reviewed rules.
+# ============================================================================
+
+name: machines
+tier: basic
+allow: marble, lapis, gold, lux, outline
+opaque-only: true
+max-colors: 24
+
+# --- How a basic machine is built -------------------------------------------
+#
+# BODY      Marble carries the machine. The casing/panel/frame is marble, and
+#           most of the surface is marble.light / marble.mid. Use the marble
+#           bevel (specular top-left, deep bottom-right) instead of an outline
+#           to separate the frame from the body.
+#
+# ACCENTS   Gold and lapis are accents only - small areas that pop against the
+#           marble. Bolts, rings, rails, inlays (gold); gems, lenses, windows,
+#           cores (lapis). gold.deepest / gold.dark are shadow-only: a single
+#           1px line under a bright gold edge, never a fill.
+#
+# LIGHT     lux.* is emissive. Windows and lens centres ramp outward from
+#           lux.specular. A machine that does work should look lit.
+#
+# OUTLINE   outline.* is for recessed gaps and firebox surrounds only. Do NOT
+#           draw a dark border around the whole block - that reads as an item,
+#           not a block.
+#
+# NO STEEL  There is no metal/steel ramp. Do not approximate one with gold or
+#           outline; the base material is marble.
+#
+# TILING    Block faces must tile seamlessly. Review the *.3x3.png preview.
+#           The checker warns when opposing edges differ strongly.
+#
+# LIGHT DIR Top-left, consistent with items.
+#
+# ADVANCED  The advanced tier is expected to add an "advanced lapis lux" ramp
+#           and to reuse marble/gold. It does not get its own palette.
+# ============================================================================

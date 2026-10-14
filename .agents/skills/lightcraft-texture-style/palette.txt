@@ -1,0 +1,113 @@
+# LightCraft texture palette
+# ============================================================================
+# THE single source of truth for every color used in LightCraft textures.
+# Do not hard-code a color anywhere else. To use a new color: add it here, on
+# the right ramp, with a note saying what it is for - then draw it through
+# scripts/TextureLib.java by name.
+#
+# Each ramp carries:
+#   # use:  what the ramp is for, and where it may appear
+#   # rule: the hard constraint on how it may (not) be used
+# and each color may carry a short trailing note after '#'.
+#
+# ----------------------------------------------------------------------------
+# STATUS
+#   STATUS: LOCKED     TextureCheck enforces this palette; off-palette pixels
+#                      are a hard failure.
+#   STATUS: UNLOCKED   colors may be drafted and no adherence check runs.
+# While UNLOCKED the checker only reports structural problems, so the palette
+# can be shaped freely. Flip to LOCKED once the style is agreed.
+#
+# Format
+#   STATUS: LOCKED|UNLOCKED   enforcement switch (read by TextureCheck)
+#   title: ...                optional label for the palette card
+#   [ramp-name]               start a named ramp (one material or accent)
+#   RRGGBB  name   # note     a color; everything after '#' is a note
+#   # ...                     a full-line comment
+#   (blank)                   ignored
+#
+# NAMING
+#   "lapis" is Latin for "stone"; on its own it names no material here.
+#     lapis  = LAPIS LAZULI, the familiar blue mineral. An accent.
+#     lux    = LAPIS LUX, a new mineral added by this mod. Golden and
+#              self-emissive. It is NOT a variant of lapis lazuli - the two
+#              only share the word "stone", so the ramp names are unrelated.
+# ============================================================================
+
+STATUS: UNLOCKED
+title: LightCraft core palette (draft)
+
+# --- Materials --------------------------------------------------------------
+
+[marble]
+# use:  the DEFAULT BODY for machines, casing panels, frames, bevels and the
+#       marble block. Most of a machine should be marble.
+# rule: never use marble as an accent or highlight - it is the ground that the
+#       gold, lapis and lux accents sit on.
+FAFAF7  marble.specular   # brightest; top-left bevel tip / specular
+F2F2EE  marble.highlight  # raised edges and lit faces
+E6E6E1  marble.light      # default panel body (largest area)
+D5D5D0  marble.mid        # body falloff / large flat surfaces
+C1C1BC  marble.shadow     # recessed edges, bottom-right bevel
+AAAAA6  marble.deep       # deepest marble; under-edges, subtle AO
+C9CEDC  marble.vein       # cool blue-grey veins / carved detail; use sparingly
+
+[lapis]
+# use:  the ACCENT material: LAPIS LAZULI, the familiar blue mineral. Gems,
+#       lenses, inlays, machine windows, cores.
+# rule: the saturated blue is the signature accent - keep the area small so it
+#       pops. Do not use lapis as a large body fill.
+16265F  lapis.deepest     # inner shadow of a gem / recess
+24408F  lapis.dark
+3560C4  lapis.mid         # default lapis
+4E81E6  lapis.light
+86ACF7  lapis.highlight
+CFDEFF  lapis.specular    # specular tip; near-white
+
+[gold]
+# use:  the ACCENT metal. Bolts, rings, rails, inlays, trim on machines/items.
+# rule: gold.deepest and gold.dark are SHADOW ONLY - a single 1px line beneath
+#       a bright gold edge. Never use them as a fill or a body color.
+6E5210  gold.deepest      # SHADOW ONLY
+9A7418  gold.dark         # SHADOW ONLY
+C79A22  gold.shadow       # low-light gold; thin under-lines
+E6BE45  gold.mid          # main gold
+F7D97E  gold.highlight    # lit gold
+FFF0B8  gold.specular     # specular tip
+
+# --- Light ------------------------------------------------------------------
+
+[lux]
+# use:  LAPIS LUX - this mod's own golden, self-emissive mineral. EMISSIVE
+#       light cores: furnace windows, lens centres, lamps, lapis lux items.
+# rule: self-lit; ramp outward from lux.specular at the centre. Never shade a
+#       lux color with a non-lux color.
+EFDC96  lux.mid
+F8ECB6  lux.light
+FFF6CF  lux.highlight
+FFFDF0  lux.specular
+
+# --- Structure --------------------------------------------------------------
+
+[outline]
+# use:  dark structural edges only - recessed gaps, firebox surrounds, and item
+#       outlines where a silhouette must read against any background.
+# rule: NOT a general border. Prefer bevel shading to outlining on blocks and
+#       machines; reserve this ramp for parts that must visually separate.
+1B2130  outline.deep
+2C3448  outline.mid
+
+# ============================================================================
+# CATEGORY USAGE  (summary - full rules belong in references/style-spec.md)
+#
+# Categories share this one palette; they differ in RULES, not in colors.
+#
+#   items     transparent background. Dark outline so the silhouette reads at
+#             16px on any background. Low color budget. Light from top-left.
+#   machines  opaque. Marble body + bright gold and lapis accents (no steel).
+#             Emissive lux for windows. Prefer bevel shading over outlining.
+#             Textures must tile seamlessly.
+#
+# The intended axis is category x tier. A tier is expressed as EXTRA RAMPS
+# (e.g. an "advanced lapis lux" ramp added later), never as a second palette.
+# ============================================================================
