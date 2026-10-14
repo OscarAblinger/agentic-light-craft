@@ -1,0 +1,25 @@
+# LightCraft texture palette
+# ============================================================================
+# STATUS: UNLOCKED
+#
+# No colors are defined yet. The palette is intended to be designed together
+# with the project owner, then locked here and described in
+# references/style-spec.md.
+#
+# While this file has no color entries, TextureCheck skips palette checks and
+# only reports structural problems.
+#
+# Format:
+#   [ramp-name]           start a named color ramp (for example a material)
+#   RRGGBB  OptionalName  a color, one per line
+#   # ...                 a comment (ignored)
+#   (blank lines)         ignored
+#
+# Example layout (these lines are comments and are NOT real colors yet):
+#   [stone]
+#   2b2b2b  stone.shadow
+#   4a4a4a  stone.mid
+#   6e6e6e  stone.light
+#   [accent]
+#   a6d84c  accent.lapis_lux
+# ============================================================================

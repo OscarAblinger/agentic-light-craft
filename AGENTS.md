@@ -28,6 +28,19 @@ After running verification, summarize:
 
 Agents must also ask the user for feedback before committing changes.
 
+## Textures
+
+Any new or changed pixel-art texture must follow the project texture style guide
+and pass its checker before committing.
+
+- Load the `lightcraft-texture-style` skill; it defines the workflow and rules.
+- Locked palette: `.agents/skills/lightcraft-texture-style/palette.txt`.
+- Style rules: `.agents/skills/lightcraft-texture-style/references/style-spec.md`.
+- Run the checker (`.agents/skills/lightcraft-texture-style/scripts/TextureCheck.java`)
+  on changed textures and report hard failures and warnings.
+- The palette and style spec are not final until their status says `LOCKED`.
+  Do not invent style decisions; ask the user.
+
 ## Commit Policy
 
 After verification passes and the user confirms the result, agents should commit the changes.
