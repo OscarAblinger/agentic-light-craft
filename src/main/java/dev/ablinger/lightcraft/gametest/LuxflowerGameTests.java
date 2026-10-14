@@ -42,11 +42,15 @@ public final class LuxflowerGameTests {
   private LuxflowerGameTests() {
   }
 
+  /** Suncharge of the fifth scenario, big enough to spill over into every bundle tier. */
+  private static final int BUNDLE_SUNCHARGE = 100;
+
   /**
    * Harvests one immature and one mature luxflower without a passed day, then grows a
    * second mature luxflower over two full minecraft days, and checks the drops and the
-   * suncharge of all four crops. The fourth crop grows from the seed the third crop
-   * dropped, remembering its suncharge of 2, which keeps counting up from there.
+   * suncharge of all five crops. The fourth crop grows from the seed the third crop
+   * dropped, remembering its suncharge of 2, which keeps counting up from there. The
+   * fifth crop carries a large suncharge so its petals drop compressed into bundles.
    */
   public static void luxflowerSeedDrops(GameTestHelper helper) {
     startAtKnownDay(helper);
@@ -54,13 +58,17 @@ public final class LuxflowerGameTests {
     placeCrop(helper, 1, 0);
     placeCrop(helper, 2, 0);
     placeSoil(helper, 3);
+    placeSoil(helper, 4);
+    plantSeed(helper, 4, seedsRemembering(helper, BUNDLE_SUNCHARGE));
 
     // The block entities remember the day their crop started growing on, no daybreak
-    // happened yet, so nothing new is witnessed and no petals are earned.
+    // happened yet, so nothing new is witnessed and no petals are earned. The heavily
+    // charged seed handed its suncharge over to its crop unchanged.
     helper.runAfterDelay(2, () -> {
       assertSuncharge(helper, 0, 0);
       assertSuncharge(helper, 1, 0);
       assertSuncharge(helper, 2, 0);
+      assertSuncharge(helper, 4, BUNDLE_SUNCHARGE);
     });
 
     // Harvest the immature crop while the other two grow to full size.
@@ -97,24 +105,47 @@ public final class LuxflowerGameTests {
     });
 
     // The replanted crop witnessed the day it was planted on without a new daybreak,
-    // then grows to full size while one more day passes.
+    // then grows to full size while one more day passes. The heavily charged crop grows
+    // to full size as well so it also yields its petals.
     helper.runAfterDelay(21, () -> {
       assertSuncharge(helper, 3, 2);
       advanceDays(helper, 1);
       growToFullSize(helper, 3);
+      growToFullSize(helper, 4);
     });
 
-    // The replanted crop witnessed one more daybreak on top of the remembered suncharge.
+    // Both crops witnessed one more daybreak on top of their remembered suncharge. Both
+    // mature crops are harvested now, the charged one releasing its bundled petals.
     helper.runAfterDelay(24, () -> {
       assertSuncharge(helper, 3, 3);
       harvest(helper, 3);
+      harvest(helper, 4);
     });
 
-    // Fully grown with three witnessed daybreaks: the seed remembers 3 and 3 petals drop.
+    // Fully grown, the remembered suncharge plus three witnessed daybreaks: the seed
+    // remembers that total and the petals drop compressed into bundles plus a remainder.
     helper.runAfterDelay(27, () -> {
       assertHarvest(helper, 3, 3, 3);
+      assertPetalBundles(helper, 4, BUNDLE_SUNCHARGE + 3);
       helper.succeed();
     });
+  }
+
+  /**
+   * Asserts the harvest of a heavily charged crop: the remembering seed, and its many
+   * petals compressed into small petal bundles plus the loose remainder, so the drop
+   * stays a handful of stacks instead of dozens of petals.
+   */
+  private static void assertPetalBundles(GameTestHelper helper, int scenario, int expectedSuncharge) {
+    int petalBundles = expectedSuncharge / 64;
+    int smallBundles = (expectedSuncharge % 64) / 8;
+    int loosePetals = expectedSuncharge % 8;
+    helper.assertItemEntityCountIs(LightCraft.LUXFLOWER_SEEDS.get().asItem(), crop(scenario), 2.0, 1);
+    helper.assertValueEqual(droppedSeed(helper, scenario).getOrDefault(LightCraft.SUNCHARGE.get(), 0),
+        expectedSuncharge, "suncharge of dropped seed");
+    helper.assertItemEntityCountIs(LightCraft.PETAL_BUNDLE.get().asItem(), crop(scenario), 2.0, petalBundles);
+    helper.assertItemEntityCountIs(LightCraft.SMALL_PETAL_BUNDLE.get().asItem(), crop(scenario), 2.0, smallBundles);
+    helper.assertItemEntityCountIs(LightCraft.LUXFLOWER_PETAL.get().asItem(), crop(scenario), 2.0, loosePetals);
   }
 
   /**
@@ -158,6 +189,13 @@ public final class LuxflowerGameTests {
 
   private static void advanceDays(GameTestHelper helper, int days) {
     helper.getLevel().clockManager().addTicks(overworldClock(helper), (int) (days * DAY_LENGTH));
+  }
+
+  /** Builds a fresh seed carrying the given suncharge, as if replanted from an older crop. */
+  private static ItemStack seedsRemembering(GameTestHelper helper, int suncharge) {
+    ItemStack seeds = new ItemStack(LightCraft.LUXFLOWER_SEEDS.get());
+    seeds.set(LightCraft.SUNCHARGE.get(), suncharge);
+    return seeds;
   }
 
   private static void harvest(GameTestHelper helper, int scenario) {

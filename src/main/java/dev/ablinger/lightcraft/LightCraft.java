@@ -2,8 +2,10 @@ package dev.ablinger.lightcraft;
 
 import dev.ablinger.lightcraft.crop.LuxflowerBlock;
 import dev.ablinger.lightcraft.crop.LuxflowerBlockEntity;
+import dev.ablinger.lightcraft.crop.PetalBundles;
 import dev.ablinger.lightcraft.gametest.LuxflowerGameTests;
 import com.mojang.serialization.Codec;
+import java.util.Locale;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import net.minecraft.core.component.DataComponentType;
@@ -14,7 +16,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -26,7 +30,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.common.tooltip.TooltipLocation;
 import net.neoforged.neoforge.event.RegisterTooltipAppendersEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.registries.DeferredBlock;
@@ -49,6 +53,7 @@ public class LightCraft {
   public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(MOD_ID);
   public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, MOD_ID);
   public static final DeferredRegister<DataComponentType<?>> DATA_COMPONENT_TYPES = DeferredRegister.create(Registries.DATA_COMPONENT_TYPE, MOD_ID);
+  public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MOD_ID);
 
   // Lapis Lux Ore Block with multiple variants
   public static final DeferredBlock<Block> LAPIS_LUX_ORE = BLOCKS.register("lapis_lux_ore", name -> {
@@ -119,6 +124,38 @@ public class LightCraft {
         .stacksTo(64));
   });
 
+  // Petal bundles, compressing the petal harvest so big suncharges stay compact.
+  // A small bundle holds 8 petals, each following tier multiplies that by 64.
+  public static final DeferredItem<Item> SMALL_PETAL_BUNDLE = ITEMS.register("small_petal_bundle", name -> {
+    return new Item(new Item.Properties()
+        .setId(ResourceKey.create(Registries.ITEM, name))
+        .stacksTo(64));
+  });
+
+  public static final DeferredItem<Item> PETAL_BUNDLE = ITEMS.register("petal_bundle", name -> {
+    return new Item(new Item.Properties()
+        .setId(ResourceKey.create(Registries.ITEM, name))
+        .stacksTo(64));
+  });
+
+  public static final DeferredItem<Item> DOUBLE_PETAL_BUNDLE = ITEMS.register("double_petal_bundle", name -> {
+    return new Item(new Item.Properties()
+        .setId(ResourceKey.create(Registries.ITEM, name))
+        .stacksTo(64));
+  });
+
+  public static final DeferredItem<Item> TRIPLE_PETAL_BUNDLE = ITEMS.register("triple_petal_bundle", name -> {
+    return new Item(new Item.Properties()
+        .setId(ResourceKey.create(Registries.ITEM, name))
+        .stacksTo(64));
+  });
+
+  public static final DeferredItem<Item> QUADRUPLE_PETAL_BUNDLE = ITEMS.register("quadruple_petal_bundle", name -> {
+    return new Item(new Item.Properties()
+        .setId(ResourceKey.create(Registries.ITEM, name))
+        .stacksTo(64));
+  });
+
   // Block entity of the luxflower, counting the daybreaks the crop witnessed
   public static final Supplier<BlockEntityType<LuxflowerBlockEntity>> LUXFLOWER_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register("luxflower",
       () -> new BlockEntityType<>(LuxflowerBlockEntity::new, false, LUXFLOWER.get()));
@@ -136,6 +173,29 @@ public class LightCraft {
   public static final Supplier<Consumer<GameTestHelper>> LUXFLOWER_SEED_DROPS = TEST_FUNCTIONS.register("luxflower_seed_drops",
       () -> LuxflowerGameTests::luxflowerSeedDrops);
 
+  // The mod's own creative tab, holding every block and item of LightCraft
+  public static final Supplier<CreativeModeTab> LIGHTCRAFT_TAB = CREATIVE_MODE_TABS.register("lightcraft",
+      () -> CreativeModeTab.builder()
+          .title(Component.translatable("itemGroup.lightcraft"))
+          .icon(() -> new ItemStack(LUXFLOWER_PETAL.get()))
+          .displayItems((parameters, output) -> {
+            // Lapis lux materials and blocks
+            output.accept(LAPIS_LUX_ORE_ITEM);
+            output.accept(RAW_LAPIS_LUX_BLOCK_ITEM);
+            output.accept(LAPIS_LUX_INGOT_BLOCK_ITEM);
+            output.accept(RAW_LAPIS_LUX_ITEM);
+            output.accept(LAPIS_LUX_INGOT_ITEM);
+            // The luxflower crop and its harvest
+            output.accept(LUXFLOWER_SEEDS);
+            output.accept(LUXFLOWER_PETAL);
+            output.accept(SMALL_PETAL_BUNDLE);
+            output.accept(PETAL_BUNDLE);
+            output.accept(DOUBLE_PETAL_BUNDLE);
+            output.accept(TRIPLE_PETAL_BUNDLE);
+            output.accept(QUADRUPLE_PETAL_BUNDLE);
+          })
+          .build());
+
   // Register the commonSetup method for modloading
   public LightCraft(ModContainer container, IEventBus modEventBus) {
     container.registerConfig(ModConfig.Type.COMMON, Config.SPEC, MOD_ID);
@@ -147,10 +207,10 @@ public class LightCraft {
     BLOCK_ENTITY_TYPES.register(modEventBus);
     DATA_COMPONENT_TYPES.register(modEventBus);
     TEST_FUNCTIONS.register(modEventBus);
+    CREATIVE_MODE_TABS.register(modEventBus);
 
     NeoForge.EVENT_BUS.register(this);
 
-    modEventBus.addListener(this::addCreative);
     modEventBus.addListener(this::registerTooltipAppenders);
   }
 
@@ -163,31 +223,27 @@ public class LightCraft {
     Config.ITEM_STRINGS.get().forEach((item) -> LOGGER.info("ITEM >> {}", item));
   }
 
-  // Add creative items to their respective tabs
-  private void addCreative(BuildCreativeModeTabContentsEvent event) {
-    // Add lapis lux blocks to building_blocks tab
-    if (event.getTabKey() == net.minecraft.world.item.CreativeModeTabs.BUILDING_BLOCKS) {
-      event.accept(LAPIS_LUX_ORE_ITEM);
-      event.accept(RAW_LAPIS_LUX_BLOCK_ITEM);
-      event.accept(LAPIS_LUX_INGOT_BLOCK_ITEM);
-      event.accept(RAW_LAPIS_LUX_ITEM);
-      event.accept(LAPIS_LUX_INGOT_ITEM);
-    }
-    // Add the luxflower seeds to the natural_blocks tab, where vanilla seeds live as well
-    if (event.getTabKey() == net.minecraft.world.item.CreativeModeTabs.NATURAL_BLOCKS) {
-      event.accept(LUXFLOWER_SEEDS);
-      event.accept(LUXFLOWER_PETAL);
-    }
-  }
-
   // Show how many daybreaks a suncharged seed witnessed in its tooltip
   private void registerTooltipAppenders(RegisterTooltipAppendersEvent event) {
     event.registerComponentAppenderAfterAll(SUNCHARGE, (stack, context, display, player, flag, builder) -> {
       int suncharge = stack.getOrDefault(SUNCHARGE.get(), 0);
       if (suncharge > 0) {
-        builder.accept(Component.translatable("lightcraft.tooltip.suncharge", suncharge));
+        builder.accept(Component.translatable("lightcraft.tooltip.suncharge", group(suncharge)));
       }
     });
+
+    // Show how many loose petals a petal bundle compresses
+    event.registerAppender(TooltipLocation.POST_CUSTOM, (stack, context, display, player, flag, builder) -> {
+      int petals = PetalBundles.petalsPer(stack.getItem());
+      if (petals > 0) {
+        builder.accept(Component.translatable("lightcraft.tooltip.petal_bundle", group(petals)));
+      }
+    });
+  }
+
+  // Formats a count with comma separators so big numbers stay readable (4,096 petals)
+  private static String group(int value) {
+    return String.format(Locale.ENGLISH, "%,d", value);
   }
 
   // You can use SubscribeEvent and let the Event Bus discover methods to call

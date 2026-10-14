@@ -1,6 +1,5 @@
 {
-  "itemGroup.lightcraft": "LightCraft Tab",
-  "itemGroup.lightcraft.lapis_lux": "Lapis Lux",
+  "itemGroup.lightcraft": "LightCraft",
   
   "block.lightcraft.lapis_lux_ore": "Lapis Lux Ore",
   "item.lightcraft.raw_lapis_lux": "Raw Lapis Lux",
@@ -11,7 +10,13 @@
   "block.lightcraft.luxflower": "Luxflower",
   "item.lightcraft.luxflower_seeds": "Luxflower Seeds",
   "item.lightcraft.luxflower_petal": "Luxflower Petal",
+  "item.lightcraft.small_petal_bundle": "Small Petal Bundle",
+  "item.lightcraft.petal_bundle": "Petal Bundle",
+  "item.lightcraft.double_petal_bundle": "Double Petal Bundle",
+  "item.lightcraft.triple_petal_bundle": "Triple Petal Bundle",
+  "item.lightcraft.quadruple_petal_bundle": "Quadruple Petal Bundle",
   "lightcraft.tooltip.suncharge": "Witnessed %s daybreaks",
+  "lightcraft.tooltip.petal_bundle": "%s petals",
   
   "block.lightcraft.example_block": "Example Block",
   "item.lightcraft.example_item": "Example Item",
