@@ -169,7 +169,15 @@ public final class LuxflowerGameTests {
 
   private static void growToFullSize(GameTestHelper helper, int scenario) {
     // Setting the age on the same block keeps the block entity with its suncharge.
-    helper.setBlock(crop(scenario), LightCraft.LUXFLOWER.get().getStateForAge(7));
+    BlockPos pos = crop(scenario);
+    int suncharge = 0;
+    if (helper.getBlockEntity(pos, LuxflowerBlockEntity.class) != null) {
+      suncharge = helper.getBlockEntity(pos, LuxflowerBlockEntity.class).getSuncharge();
+    }
+    helper.setBlock(pos, LightCraft.LUXFLOWER.get().getStateForAge(7));
+    if (helper.getBlockEntity(pos, LuxflowerBlockEntity.class) != null) {
+      helper.getBlockEntity(pos, LuxflowerBlockEntity.class).setSuncharge(suncharge);
+    }
   }
 
   /**
