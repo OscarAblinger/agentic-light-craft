@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "lightcraft:quadruple_petal_bundle"
+  ],
+  "result": {
+    "id": "lightcraft:triple_petal_bundle",
+    "count": 64
+  }
+}

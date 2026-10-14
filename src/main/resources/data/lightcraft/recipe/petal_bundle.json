@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "BBB",
+    "B B",
+    "BBB"
+  ],
+  "key": {
+    "B": "lightcraft:small_petal_bundle"
+  },
+  "result": {
+    "id": "lightcraft:petal_bundle"
+  }
+}

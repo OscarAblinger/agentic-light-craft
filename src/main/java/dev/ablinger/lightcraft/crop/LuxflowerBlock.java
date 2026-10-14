@@ -65,11 +65,10 @@ public class LuxflowerBlock extends CropBlock implements EntityBlock {
       }
     }
 
-    // The petals are the day based harvest of the crop and only drop when it is fully grown.
+    // The petals are the day based harvest of a mature crop. They drop compressed into
+    // bundles so a large suncharge does not litter thousands of loose petals.
     if (suncharge > 0 && this.isMaxAge(state)) {
-      for (int remaining = suncharge; remaining > 0; remaining -= 64) {
-        drops.add(new ItemStack(LightCraft.LUXFLOWER_PETAL.get(), Math.min(remaining, 64)));
-      }
+      PetalBundles.decompose(suncharge, drops::add);
     }
     return drops;
   }
