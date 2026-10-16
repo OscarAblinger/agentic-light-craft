@@ -10,7 +10,8 @@ Hard rules fail the task; soft rules warn and are reviewed by a human. With
 |------|--------|
 | Readable PNG | The file must be a valid PNG that `ImageIO` can decode. |
 | Dimensions | Width and height must each be a power of two, and the image must be square **or** an animation multiple (`height % width == 0`). |
-| Palette adherence | Every opaque pixel must be a color from the locked `palette.txt`. Skipped while the palette is unlocked. |
+| Palette adherence | Every opaque pixel must be a color from `palette.txt` when that file says `STATUS: LOCKED` (or has colors and no `STATUS` line). Skipped while `STATUS` is `UNLOCKED`. |
+| Category ramps | With `--category`, a color whose ramp is not in the category's `allow:` list is a failure (same as off-palette). |
 | Opaque-only (opt-in) | With `--opaque-only`, any pixel with alpha `1–254` is a failure. |
 
 ## Warnings (judgement / review)

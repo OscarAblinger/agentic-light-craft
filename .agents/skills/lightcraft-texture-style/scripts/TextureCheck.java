@@ -53,6 +53,7 @@ public final class TextureCheck {
         List<Path> inputs = new ArrayList<>();
         Path paletteFile = null;
         Path previewDir = null;
+        Path categoryFile = null;
         boolean opaqueOnly = false;
         boolean strict = false;
         int maxColors = 24;
@@ -61,6 +62,7 @@ public final class TextureCheck {
             String a = args[i];
             switch (a) {
                 case "--palette" -> paletteFile = Paths.get(args[++i]);
+                case "--category" -> categoryFile = Paths.get(args[++i]);
                 case "--preview" -> previewDir = Paths.get(args[++i]);
                 case "--opaque-only" -> opaqueOnly = true;
                 case "--strict" -> strict = true;
@@ -84,9 +86,48 @@ public final class TextureCheck {
             System.exit(2);
         }
 
-        Map<String, Integer> palette =
-                paletteFile != null ? loadPalette(paletteFile) : new LinkedHashMap<>();
-        boolean paletteLocked = !palette.isEmpty();
+        Map<String, Integer> palette;
+        Map<String, String> rampOf;
+        String status;
+        if (paletteFile != null) {
+            Palette loaded = loadPalette(paletteFile);
+            palette = loaded.colors();
+            rampOf = loaded.rampOf();
+            status = loaded.status();
+        } else {
+            palette = new LinkedHashMap<>();
+            rampOf = new LinkedHashMap<>();
+            status = null;
+        }
+        // Enforcement is driven by STATUS when present, so a draft palette may
+        // hold colors without failing every texture. Without a STATUS line we
+        // keep the old behaviour: a non-empty palette is treated as locked.
+        boolean paletteLocked = "LOCKED".equals(status)
+                || (status == null && !palette.isEmpty());
+
+        // A category restricts which ramps are allowed and may set rules such as
+        // opaque-only and the color budget. It never adds colors.
+        Category category = categoryFile != null ? loadCategory(categoryFile) : null;
+        String categoryName = null;
+        if (category != null) {
+            categoryName = category.name();
+            if (category.opaqueOnly()) {
+                opaqueOnly = true;
+            }
+            if (category.maxColors() != null) {
+                maxColors = category.maxColors();
+            }
+            if (!category.allow().isEmpty()) {
+                Map<String, Integer> filtered = new LinkedHashMap<>();
+                for (Map.Entry<String, Integer> e : palette.entrySet()) {
+                    String ramp = rampOf.get(e.getKey());
+                    if (ramp != null && category.allow().contains(ramp)) {
+                        filtered.put(e.getKey(), filtered.size());
+                    }
+                }
+                palette = filtered;
+            }
+        }
 
         List<Path> files = new ArrayList<>();
         for (Path in : inputs) {
@@ -103,7 +144,12 @@ public final class TextureCheck {
         System.out.println("TextureCheck: " + files.size() + " file(s)");
         System.out.println("Palette: " + (paletteLocked
                 ? paletteFile + " (" + palette.size() + " colors)"
-                : "unlocked - palette checks skipped"));
+                : "not enforced - palette checks skipped"
+                    + (paletteFile != null ? " (" + paletteFile + ", STATUS "
+                        + (status != null ? status : "UNLOCKED") + ")" : "")));
+        if (categoryName != null) {
+            System.out.println("Category: " + categoryName + " (" + categoryFile + ")");
+        }
         System.out.println();
 
         for (Path f : files) {
@@ -299,19 +345,104 @@ public final class TextureCheck {
         }
     }
 
-    private static Map<String, Integer> loadPalette(Path file) throws IOException {
+    private record Palette(Map<String, Integer> colors, Map<String, String> rampOf,
+                           String status) {
+    }
+
+    private record Category(String name, String tier, Set<String> allow,
+                            boolean opaqueOnly, Integer maxColors) {
+    }
+
+    private static Palette loadPalette(Path file) throws IOException {
         Map<String, Integer> map = new LinkedHashMap<>();
+        Map<String, String> rampOf = new LinkedHashMap<>();
+        String ramp = null;
+        String status = null;
         for (String raw : Files.readAllLines(file, StandardCharsets.UTF_8)) {
-            String line = raw.trim();
-            if (line.isEmpty() || line.startsWith("#") || line.startsWith("[")) {
+            String line = stripComment(raw);
+            if (line.isEmpty()) {
+                continue;
+            }
+            String lower = line.toLowerCase();
+            if (lower.startsWith("status:")) {
+                status = line.substring(7).trim().toUpperCase();
+                continue;
+            }
+            if (lower.startsWith("title:")) {
+                continue;
+            }
+            if (line.startsWith("[")) {
+                ramp = line.replaceAll("[\\[\\]]", "").trim().toLowerCase();
                 continue;
             }
             Matcher m = HEX.matcher(line);
             if (m.find()) {
-                map.putIfAbsent(m.group().toUpperCase(), map.size());
+                String hex = m.group().toUpperCase();
+                map.putIfAbsent(hex, map.size());
+                if (ramp != null) {
+                    rampOf.putIfAbsent(hex, ramp);
+                }
             }
         }
-        return map;
+        return new Palette(map, rampOf, status);
+    }
+
+    private static Category loadCategory(Path file) throws IOException {
+        String name = file.getFileName().toString();
+        String tier = null;
+        Set<String> allow = new LinkedHashSet<>();
+        boolean opaqueOnly = false;
+        Integer maxColors = null;
+        for (String raw : Files.readAllLines(file, StandardCharsets.UTF_8)) {
+            String line = stripComment(raw);
+            if (line.isEmpty()) {
+                continue;
+            }
+            int colon = line.indexOf(':');
+            if (colon < 0) {
+                continue;
+            }
+            String key = line.substring(0, colon).trim().toLowerCase();
+            String value = line.substring(colon + 1).trim();
+            switch (key) {
+                case "name" -> {
+                    if (!value.isEmpty()) {
+                        name = value;
+                    }
+                }
+                case "tier" -> tier = value;
+                case "allow" -> {
+                    for (String r : value.split("[,\\s]+")) {
+                        if (!r.isEmpty()) {
+                            allow.add(r.toLowerCase());
+                        }
+                    }
+                }
+                case "opaque-only" -> opaqueOnly = Boolean.parseBoolean(value);
+                case "max-colors" -> maxColors = Integer.parseInt(value);
+                default -> {
+                    // Other keys (tiling, outline, ...) are human-reviewed rules.
+                }
+            }
+        }
+        return new Category(name, tier, allow, opaqueOnly, maxColors);
+    }
+
+    /**
+     * Trim a palette line and cut any trailing {@code #} note, so a line like
+     * {@code AAAAA6  marble.deep   # under-edges only} keeps only the color.
+     * A line that starts with {@code #} becomes empty (a full-line comment).
+     */
+    private static String stripComment(String raw) {
+        String line = raw.trim();
+        int hash = line.indexOf('#');
+        if (hash == 0) {
+            return "";
+        }
+        if (hash > 0) {
+            line = line.substring(0, hash).trim();
+        }
+        return line;
     }
 
     private static String rgbHex(int rgb) {
@@ -327,7 +458,10 @@ public final class TextureCheck {
         System.out.println();
         System.out.println("Options:");
         System.out.println("  --palette <file>   Palette file (RRGGBB tokens, # comments, [ramp] groups).");
-        System.out.println("                     Empty/unlocked palette skips palette checks.");
+        System.out.println("                     A 'STATUS: LOCKED' line enables enforcement;");
+        System.out.println("                     UNLOCKED/absent-with-no-colors skips palette checks.");
+        System.out.println("  --category <file>  Category rule file; restricts allowed ramps and may");
+        System.out.println("                     set opaque-only / max-colors for that category.");
         System.out.println("  --opaque-only      Treat partial transparency as a hard failure.");
         System.out.println("  --strict           Treat warnings as failures.");
         System.out.println("  --max-colors <n>   Soft limit for distinct colors per texture (default 24).");

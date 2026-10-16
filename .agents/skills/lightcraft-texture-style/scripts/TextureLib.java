@@ -37,9 +37,13 @@ public final class TextureLib {
     /** Load a palette file. Colors outside the palette cannot be produced by name. */
     public TextureLib(Path paletteFile) throws IOException {
         for (String raw : Files.readAllLines(paletteFile, StandardCharsets.UTF_8)) {
-            String line = raw.trim();
-            if (line.isEmpty() || line.startsWith("#") || line.startsWith("[")) {
+            String line = stripComment(raw);
+            if (line.isEmpty() || line.startsWith("[")) {
                 continue;
+            }
+            String lower = line.toLowerCase();
+            if (lower.startsWith("status:") || lower.startsWith("title:")) {
+                continue; // file directives, not colors
             }
             Matcher m = Pattern.compile("(?i)(?<![0-9a-f])[0-9a-f]{6}(?![0-9a-f])").matcher(line);
             if (!m.find()) {
@@ -49,11 +53,29 @@ public final class TextureLib {
             byHex.putIfAbsent(m.group().toUpperCase(), rgb);
             String rest = line.substring(m.end()).trim();
             if (!rest.isEmpty()) {
+                byName.putIfAbsent(rest, rgb);
                 for (String name : rest.split("[\\s,]+")) {
                     byName.putIfAbsent(name, rgb);
                 }
             }
         }
+    }
+
+    /**
+     * Trim a palette line and cut any trailing {@code #} note, so a line like
+     * {@code AAAAA6  marble.deep   # under-edges only} keeps only the color name.
+     * A line that starts with {@code #} becomes empty (a full-line comment).
+     */
+    private static String stripComment(String raw) {
+        String line = raw.trim();
+        int hash = line.indexOf('#');
+        if (hash == 0) {
+            return "";
+        }
+        if (hash > 0) {
+            line = line.substring(0, hash).trim();
+        }
+        return line;
     }
 
     /** Resolve a {@code #RRGGBB} string or a palette name to an opaque ARGB color. */
@@ -95,6 +117,33 @@ public final class TextureLib {
                 img.setRGB(x, y, argb);
             }
         }
+    }
+
+    /**
+     * Draw a texture from an ASCII template, one character per pixel.
+     * {@code '.'} and space are transparent. Every other character must map to a
+     * palette color in {@code legend}. This keeps pixel art readable and
+     * deterministic while staying strictly palette-bound.
+     */
+    public BufferedImage fromTemplate(String[] rows, Map<Character, String> legend) {
+        int h = rows.length;
+        int w = rows[0].length();
+        BufferedImage img = canvas(w, h);
+        for (int y = 0; y < h; y++) {
+            String row = rows[y];
+            for (int x = 0; x < row.length(); x++) {
+                char c = row.charAt(x);
+                if (c == '.' || c == ' ') {
+                    continue;
+                }
+                String name = legend.get(c);
+                if (name == null) {
+                    throw new IllegalArgumentException("No legend entry for '" + c + "'");
+                }
+                img.setRGB(x, y, color(name));
+            }
+        }
+        return img;
     }
 
     public static void save(BufferedImage img, Path out) throws IOException {

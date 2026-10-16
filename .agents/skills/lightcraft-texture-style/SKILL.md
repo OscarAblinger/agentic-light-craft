@@ -9,12 +9,25 @@ This skill keeps every pixel-art texture in the LightCraft mod visually
 consistent. It defines a single locked style, a machine-readable palette, and a
 checker that must pass before a texture change is committed.
 
+## Materials & naming
+
+- **lapis** is Latin for "stone"; alone it names nothing. Two different
+  materials share the word:
+  - **lapis lazuli** — the familiar blue mineral. The `[lapis]` *accent* ramp.
+  - **lapis lux** — a new mineral added by this mod. Golden and self-emissive.
+    The `[lux]` ramp. It is **not** a variant of lapis lazuli.
+- **marble** is the machine base material (nearest vanilla block: calcite).
+- Existing world assets are also allowed other, out-of-palette materials on
+  purpose: **stone/ore** (ore is embedded in stone) and **plants** (browns that
+  read as a sack, and greens, because they are plants). These are documented as
+  their own categories rather than forced into the core palette.
+
 ## Status
 
-The style is **not locked yet**. The palette (`palette.txt`) and the rules
-(`references/style-spec.md`) are placeholders to be designed with the project
-owner. Until `palette.txt` contains colors, the checker only reports structural
-problems and skips palette checks.
+The style is **not locked yet** — `palette.txt` says `STATUS: UNLOCKED`. The
+palette holds draft colors with per-ramp usage notes, and
+`references/style-spec.md` is still pending. While `STATUS` is `UNLOCKED`, the
+checker skips palette adherence and only reports structural problems.
 
 ## Routing Boundaries
 
@@ -29,9 +42,16 @@ problems and skips palette checks.
 
 - `references/style-spec.md` — the locked style decisions. Read it before
   drawing anything. Unknown values are recorded there as `Status: PENDING`.
+- `references/categories/*.txt` — per-category rule files (for example `items.txt`,
+  `machines.txt`). A category selects which ramps it may use and sets rules such
+  as opaque-only and the color budget. It may only restrict the palette, never
+  add colors. Pass one to the checker with `--category`.
 - `references/checker-policy.md` — which rules are hard failures and which are
   advisory warnings.
-- `palette.txt` — the machine-readable source of truth for allowed colors.
+- `palette.txt` — the machine-readable source of truth for allowed colors. Every
+  ramp carries `use:` / `rule:` notes describing what it is for and how it may be
+  used, and individual colors carry short notes. A `STATUS:` line switches
+  enforcement on (`LOCKED`) or off (`UNLOCKED`, for drafting).
 - `scripts/TextureCheck.java` — dependency-free checker (JDK ImageIO only).
 - `scripts/TextureLib.java` — shared palette loader and drawing primitives.
 - `examples/` — canonical reference textures used as visual anchors.
@@ -40,8 +60,11 @@ problems and skips palette checks.
 
 1. Read `references/style-spec.md`. If a rule you need is `PENDING`, stop and
    ask the owner instead of inventing one.
-2. Read `palette.txt`. Use only those colors. If it is unlocked, propose the
-   colors you intend to use and ask before proceeding.
+2. Read `palette.txt`. Use only those colors. Read the `use:` / `rule:` notes on
+   each ramp: they say **what the color is for** and the constraint on how it may
+   be used (for example `gold.dark` is shadow-only). If a color you need is not
+   there, propose adding it to the right ramp with a note, and ask first. If
+   `STATUS` is `UNLOCKED`, the colors are still being drafted.
 3. Draw through `scripts/TextureLib.java` (or an equivalent script under
    `scripts/`) so colors and primitives are reused, not hand-picked per pixel.
    Prefer a deterministic seed for anything generated.
@@ -63,15 +86,16 @@ so this needs no extra dependency:
 ```bash
 java .agents/skills/lightcraft-texture-style/scripts/TextureCheck.java \
   --palette .agents/skills/lightcraft-texture-style/palette.txt \
+  --category .agents/skills/lightcraft-texture-style/references/categories/machines.txt \
   --preview build/texture-previews \
-  src/main/resources/assets/lightcraft/textures
+  src/main/resources/assets/lightcraft/textures/block/machines
 ```
 
 Arguments accept files or directories (scanned recursively for `*.png`).
 
 | Flag | Effect |
 |------|--------|
-| `--palette <file>` | Palette to enforce. Unlocked/empty skips palette checks. |
+| `--palette <file>` | Palette to enforce. Enforcement is on only when the file says `STATUS: LOCKED` (or has colors and no `STATUS` line). |
 | `--opaque-only` | Treat partial transparency as a hard failure. |
 | `--strict` | Treat warnings as failures (use in verification). |
 | `--max-colors <n>` | Soft limit for distinct colors per texture (default 24). |
