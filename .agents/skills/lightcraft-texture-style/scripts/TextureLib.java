@@ -20,12 +20,15 @@ import java.util.regex.Pattern;
  * primitives are reused instead of hand-picked per pixel, which is the main
  * lever for a consistent look. Pair generated output with TextureCheck.
  *
+ * Committed per-family generators live in ../generators/ (see the README
+ * there); a generator ships in the same commit as its output textures.
+ *
  * Example:
  *
  *   var lib = new TextureLib(Paths.get(palettePath));
  *   var img = TextureLib.canvas(16, 16);
- *   lib.fill(img, "stone.mid");
- *   lib.set(img, 3, 4, "stone.light");
+ *   lib.fill(img, "marble.light");
+ *   lib.set(img, 3, 4, "marble.specular");
  *   TextureLib.clear(img, 0, 0);
  *   TextureLib.save(img, Paths.get("src/main/resources/assets/lightcraft/textures/block/my_block.png"));
  */

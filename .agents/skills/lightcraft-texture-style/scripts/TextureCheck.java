@@ -36,7 +36,8 @@ import java.util.regex.Pattern;
  * Soft checks (warnings; fail only with --strict):
  *   - the texture uses partial transparency
  *   - the texture uses more than --max-colors distinct colors
- *   - opposing edges differ strongly (possible visible tiling seam)
+ *   - opposing edges differ strongly (possible visible tiling seam; a category
+ *     may set 'tiling: none' to skip this check)
  *
  * See references/checker-policy.md for the policy behind this split.
  */
@@ -106,9 +107,13 @@ public final class TextureCheck {
                 || (status == null && !palette.isEmpty());
 
         // A category restricts which ramps are allowed and may set rules such as
-        // opaque-only and the color budget. It never adds colors.
+        // opaque-only and the color budget. It never adds colors. A category may
+        // also declare 'palette: exempt' (skip palette checks; used for ore
+        // stone and plants) and 'tiling: none' (suppress the seam warning).
         Category category = categoryFile != null ? loadCategory(categoryFile) : null;
         String categoryName = null;
+        boolean paletteExempt = false;
+        boolean checkSeam = true;
         if (category != null) {
             categoryName = category.name();
             if (category.opaqueOnly()) {
@@ -117,7 +122,9 @@ public final class TextureCheck {
             if (category.maxColors() != null) {
                 maxColors = category.maxColors();
             }
-            if (!category.allow().isEmpty()) {
+            paletteExempt = category.paletteExempt();
+            checkSeam = !"none".equalsIgnoreCase(category.tiling());
+            if (!paletteExempt && !category.allow().isEmpty()) {
                 Map<String, Integer> filtered = new LinkedHashMap<>();
                 for (Map.Entry<String, Integer> e : palette.entrySet()) {
                     String ramp = rampOf.get(e.getKey());
@@ -128,6 +135,7 @@ public final class TextureCheck {
                 palette = filtered;
             }
         }
+        boolean enforcePalette = paletteLocked && !paletteExempt;
 
         List<Path> files = new ArrayList<>();
         for (Path in : inputs) {
@@ -142,11 +150,17 @@ public final class TextureCheck {
         int filesWithWarnings = 0;
 
         System.out.println("TextureCheck: " + files.size() + " file(s)");
-        System.out.println("Palette: " + (paletteLocked
-                ? paletteFile + " (" + palette.size() + " colors)"
-                : "not enforced - palette checks skipped"
+        String paletteLine;
+        if (enforcePalette) {
+            paletteLine = paletteFile + " (" + palette.size() + " colors)";
+        } else if (paletteExempt) {
+            paletteLine = "skipped - category '" + categoryName + "' is palette-exempt";
+        } else {
+            paletteLine = "not enforced - palette checks skipped"
                     + (paletteFile != null ? " (" + paletteFile + ", STATUS "
-                        + (status != null ? status : "UNLOCKED") + ")" : "")));
+                        + (status != null ? status : "UNLOCKED") + ")" : "");
+        }
+        System.out.println("Palette: " + paletteLine);
         if (categoryName != null) {
             System.out.println("Category: " + categoryName + " (" + categoryFile + ")");
         }
@@ -169,7 +183,8 @@ public final class TextureCheck {
 
             if (img != null) {
                 checkDimensions(img, hard);
-                analyzePixels(img, paletteLocked, palette, opaqueOnly, maxColors, hard, soft);
+                analyzePixels(img, enforcePalette, palette, opaqueOnly, maxColors,
+                        checkSeam, hard, soft);
                 if (previewDir != null) {
                     writePreviews(img, f, previewDir);
                 }
@@ -212,9 +227,10 @@ public final class TextureCheck {
         }
     }
 
-    private static void analyzePixels(BufferedImage img, boolean paletteLocked,
+    private static void analyzePixels(BufferedImage img, boolean enforcePalette,
                                       Map<String, Integer> palette, boolean opaqueOnly,
-                                      int maxColors, List<String> hard, List<String> soft) {
+                                      int maxColors, boolean checkSeam,
+                                      List<String> hard, List<String> soft) {
         int w = img.getWidth();
         int h = img.getHeight();
         Set<Integer> colors = new LinkedHashSet<>();
@@ -233,13 +249,13 @@ public final class TextureCheck {
                 }
                 colors.add(argb);
                 int rgb = argb & 0xFFFFFF;
-                if (paletteLocked && !palette.containsKey(rgbHex(rgb))) {
+                if (enforcePalette && !palette.containsKey(rgbHex(rgb))) {
                     offPalette.merge(rgb, 1, Integer::sum);
                 }
             }
         }
 
-        if (paletteLocked && !offPalette.isEmpty()) {
+        if (enforcePalette && !offPalette.isEmpty()) {
             StringBuilder sb = new StringBuilder();
             int shown = 0;
             for (Map.Entry<Integer, Integer> e : offPalette.entrySet()) {
@@ -270,10 +286,12 @@ public final class TextureCheck {
             soft.add("uses " + colors.size() + " distinct colors (soft limit " + maxColors + ")");
         }
 
-        int edge = edgeContrast(img);
-        if (edge > SEAM_THRESHOLD) {
-            soft.add("opposing edges differ by ~" + edge
-                    + " (avg RGB) - review tiling in the 3x3 preview");
+        if (checkSeam) {
+            int edge = edgeContrast(img);
+            if (edge > SEAM_THRESHOLD) {
+                soft.add("opposing edges differ by ~" + edge
+                        + " (avg RGB) - review tiling in the 3x3 preview");
+            }
         }
     }
 
@@ -350,7 +368,8 @@ public final class TextureCheck {
     }
 
     private record Category(String name, String tier, Set<String> allow,
-                            boolean opaqueOnly, Integer maxColors) {
+                            boolean opaqueOnly, Integer maxColors,
+                            boolean paletteExempt, String tiling) {
     }
 
     private static Palette loadPalette(Path file) throws IOException {
@@ -392,6 +411,8 @@ public final class TextureCheck {
         String tier = null;
         Set<String> allow = new LinkedHashSet<>();
         boolean opaqueOnly = false;
+        boolean paletteExempt = false;
+        String tiling = null;
         Integer maxColors = null;
         for (String raw : Files.readAllLines(file, StandardCharsets.UTF_8)) {
             String line = stripComment(raw);
@@ -418,14 +439,17 @@ public final class TextureCheck {
                         }
                     }
                 }
+                case "palette" -> paletteExempt = "exempt".equalsIgnoreCase(value);
                 case "opaque-only" -> opaqueOnly = Boolean.parseBoolean(value);
+                case "tiling" -> tiling = value;
                 case "max-colors" -> maxColors = Integer.parseInt(value);
                 default -> {
-                    // Other keys (tiling, outline, ...) are human-reviewed rules.
+                    // Other keys (outline, light, ...) are human-reviewed rules.
                 }
             }
         }
-        return new Category(name, tier, allow, opaqueOnly, maxColors);
+        return new Category(name, tier, allow, opaqueOnly, maxColors,
+                paletteExempt, tiling);
     }
 
     /**
@@ -461,7 +485,8 @@ public final class TextureCheck {
         System.out.println("                     A 'STATUS: LOCKED' line enables enforcement;");
         System.out.println("                     UNLOCKED/absent-with-no-colors skips palette checks.");
         System.out.println("  --category <file>  Category rule file; restricts allowed ramps and may");
-        System.out.println("                     set opaque-only / max-colors for that category.");
+        System.out.println("                     set opaque-only / max-colors / tiling: none, or");
+        System.out.println("                     'palette: exempt' to skip palette checks.");
         System.out.println("  --opaque-only      Treat partial transparency as a hard failure.");
         System.out.println("  --strict           Treat warnings as failures.");
         System.out.println("  --max-colors <n>   Soft limit for distinct colors per texture (default 24).");
