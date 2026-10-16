@@ -25,12 +25,11 @@ max-colors: 64
 
 # --- How a plant is built ---------------------------------------------------
 #
-# PALETTE   EXEMPT on purpose (owner decision): plants keep their own greens,
-#           browns and petal colours instead of being forced into the core
-#           palette. The checker skips palette adherence for this category;
-#           the structural checks (dimensions, transparency reporting, budget)
-#           still run. This is one of only two exemptions - the other is the
-#           ore stone background (ores.txt).
+# PALETTE   EXEMPT on purpose: plants keep their own greens, browns and petal
+#           colours instead of being forced into the core palette. The checker
+#           skips palette adherence for this category; the structural checks
+#           (dimensions, transparency reporting, budget) still run. The ore
+#           stone background (ores.txt) is the only other exemption.
 #
 # WHAT      The luxflower crop stages (block/luxflower_stage0..7.png, 16x16
 #           cross-model textures) and their drop items (luxflower_petal,

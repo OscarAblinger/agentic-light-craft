@@ -39,10 +39,10 @@ max-colors: 24
 #           lux.specular. A machine that does work should look lit.
 #
 # FRONT     A machine FRONT face may carry a single 1px outline.deep recessed
-#           edge ring around the whole face - that is what the approved
-#           anchors in examples/machine_front_01..03 do. Casing and side faces
-#           that tile in walls stay ring-free and bevel instead. outline.* is
-#           never a thick border, a fill, or a shadow.
+#           edge ring around the whole face, as in
+#           examples/machine_front_01..03. Casing and side faces that tile in
+#           walls stay ring-free and bevel instead. outline.* is never a thick
+#           border, a fill, or a shadow.
 #
 # OPAQUE    Full blocks are opaque: alpha 0 or 255 only. Partial transparency
 #           is a hard failure for this category (directive: opaque-only: true).
@@ -56,6 +56,6 @@ max-colors: 24
 #
 # LIGHT DIR Top-left, consistent with items.
 #
-# ADVANCED  The advanced tier is expected to add an "advanced lapis lux" ramp
-#           and to reuse marble/gold. It does not get its own palette.
+# ADVANCED  The advanced tier adds ramps (for example an "advanced lapis lux"
+#           ramp) and reuses marble/gold. It does not get its own palette.
 # ============================================================================

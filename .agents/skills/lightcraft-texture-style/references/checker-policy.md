@@ -22,8 +22,8 @@ Hard rules fail the task; soft rules warn and are reviewed by a human. With
 | Distinct color count | More than the budget distinct RGBA values are reported; alpha variants count separately. Default 24; override with `--max-colors` or the category's `max-colors:`. |
 | Possible seam | Opposite edges differ by more than ~48 average RGB; review tiling in the `*.3x3.png` preview. Suppressed when the category says `tiling: none`. |
 
-Expected warnings on approved art: partial transparency in `items` and `plants`
-is intentional (soft glow / soft edges) and is reported only for confirmation.
+Partial transparency in `items` and `plants` is intentional (soft glow / soft
+edges); the warning only asks for confirmation - it is not a failure.
 
 ## Category directives that change enforcement
 

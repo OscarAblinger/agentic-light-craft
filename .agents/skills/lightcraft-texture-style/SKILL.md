@@ -1,49 +1,37 @@
 ---
 name: lightcraft-texture-style
-description: "Author and review LightCraft pixel-art textures so every block, item, entity, and GUI asset shares one consistent look. Use when creating, editing, or checking textures, palettes, or procedural texture generators. Not for SD/built-in image generation (use minecraft-imagegen) and not for resource-pack format or packaging (use minecraft-resource-pack)."
+description: "Author and review LightCraft pixel-art textures so all textures in the mod share one consistent look. Use when creating, editing, or checking textures, palettes, or procedural texture generators. Not for SD/built-in image generation (use minecraft-imagegen) and not for resource-pack format or packaging (use minecraft-resource-pack)."
 ---
 
 # LightCraft Texture Style
 
-This skill keeps every pixel-art texture in the LightCraft mod visually
-consistent. It defines a single locked style, a machine-readable palette, and a
-checker that must pass before a texture change is committed.
+This skill defines the one style that every pixel-art texture in the LightCraft
+mod follows. It is made of a machine-readable palette (`palette.txt`), a style
+spec (`references/style-spec.md`), per-category rules
+(`references/categories/`) and a checker (`scripts/TextureCheck.java`) that
+must pass before a texture change is committed.
+
+Treat the palette and the spec as fixed: if a color or rule you need is missing,
+propose the change (with a `PaletteCard` render and a checker dry run) and ask
+the owner - do not invent colors or rules.
 
 ## Materials & naming
 
 - **lapis** is Latin for "stone"; alone it names nothing. Two different
   materials share the word:
   - **lapis lazuli** — the familiar blue mineral. The `[lapis]` *accent* ramp.
-  - **lapis lux** — a new mineral added by this mod. Golden and self-emissive.
+  - **lapis lux** — a mineral added by this mod. Golden and self-emissive.
     The `[lux]` ramp. It is **not** a variant of lapis lazuli.
 - **marble** is the machine base material (nearest vanilla block: calcite).
-- Existing world assets are also allowed other, out-of-palette materials on
-  purpose: **stone/ore** (ore is embedded in stone) and **plants** (browns that
-  read as a sack, and greens, because they are plants). These are documented as
-  their own categories rather than forced into the core palette.
+- Two material families are intentionally outside the palette: **stone/ore**
+  (ore is embedded in stone) and **plants** (their own greens, browns and
+  petal colors). Their category files declare them palette-exempt.
 
-## Status
+## Supporting files
 
-**LOCKED (2026-10-17).** `palette.txt` says `STATUS: LOCKED` and
-`references/style-spec.md` records the owner-approved decisions. The checker
-enforces the palette; `plants` and `ores` are the only palette-exempt
-categories (ore stone stays byte-identical to the source art; plants keep
-their own colours). To change a colour or rule, propose the change and ask
-the owner - do not edit the locked files on your own.
-
-## Routing Boundaries
-
-- `Use when`: creating, editing, or reviewing any LightCraft texture (block,
-  item, entity, GUI, animation), or defining the palette / style rules.
-- `Do not use when`: the deliverable is SD/built-in image generation or concept
-  art (`minecraft-imagegen`).
-- `Do not use when`: the task is resource-pack format, model JSON, blockstates,
-  sounds, or packaging (`minecraft-resource-pack`).
-
-## Supporting Files
-
-- `references/style-spec.md` — the locked style decisions. Read it before
-  drawing anything. If a rule you need is missing, ask the owner.
+- `references/style-spec.md` — the style decisions (look, shading, geometry,
+  tiling, conventions). Read it before drawing anything. If a rule you need is
+  missing, ask the owner.
 - `references/categories/*.txt` — per-category rule files (`items.txt`,
   `machines.txt`, `blocks.txt`, `plants.txt`, `ores.txt`). A category selects
   which ramps it may use and sets rules such as opaque-only, tiling and the
@@ -52,20 +40,20 @@ the owner - do not edit the locked files on your own.
   `--category`.
 - `references/checker-policy.md` — which rules are hard failures and which are
   advisory warnings.
-- `palette.txt` — the machine-readable source of truth for allowed colors, with
-  per-ramp `use:` / `rule:` notes. A `STATUS:` line switches enforcement on
-  (`LOCKED`) or off (`UNLOCKED`, for drafting a new palette).
+- `palette.txt` — the source of truth for allowed colors, with per-ramp
+  `use:` / `rule:` notes. A `STATUS:` line switches enforcement on (`LOCKED`)
+  or off (`UNLOCKED`, for drafting a new palette).
 - `scripts/TextureCheck.java` — dependency-free checker (JDK ImageIO only).
 - `scripts/TextureLib.java` — shared palette loader and drawing primitives.
 - `scripts/PaletteCard.java` — renders a palette as a review image; use it
   when proposing a palette change.
-- `scripts/PaletteExtract.java` — lists the colours used by existing art; use
+- `scripts/PaletteExtract.java` — lists the colors used by existing art; use
   it when proposing a new ramp.
 - `generators/` — committed texture generators, one per texture family (see
   `generators/README.md`). A generator ships in the same commit as the
   textures it produces.
-- `examples/` — canonical reference textures (machine fronts) used as visual
-  anchors; regenerate with `generators/MachineFronts.java`.
+- `examples/` — reference textures (machine fronts) used as anchors;
+  regenerate with `generators/MachineFronts.java`.
 
 ## Workflow
 
@@ -94,8 +82,8 @@ the owner - do not edit the locked files on your own.
 
 ## Checker
 
-Run from the repository root. `java` (JDK 25) is already required by the project,
-so this needs no extra dependency:
+Run from the repository root with the project JDK 25; the checker needs no
+extra dependency:
 
 ```bash
 java .agents/skills/lightcraft-texture-style/scripts/TextureCheck.java \
@@ -129,6 +117,7 @@ reviewed.
 
 ## Verification
 
-A texture change is not complete until the checker passes and the previews have
-been reviewed. Follow the project verification policy in the root `AGENTS.md` and
-ask for owner feedback before committing.
+A texture change is not complete until the checker passes and the previews
+have been reviewed (by the owner, or by another viewer with vision). Ask for
+owner feedback before committing, and follow the verification policy in the
+root `AGENTS.md`.

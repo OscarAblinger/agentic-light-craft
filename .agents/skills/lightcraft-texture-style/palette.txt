@@ -2,7 +2,7 @@
 # ============================================================================
 # THE single source of truth for every color used in LightCraft textures.
 # Machines, items and material blocks draw every pixel from here. Ore stone and
-# plants are deliberately exempt and keep their own colours (see CATEGORY USAGE
+# plants are exempt and keep their own colours (see CATEGORY USAGE
 # below and references/categories/). Do not hard-code any other color anywhere
 # else. To use a new color: add it here, on the right ramp, with a note saying
 # what it is for - then draw it through scripts/TextureLib.java by name.
@@ -18,8 +18,6 @@
 #                      are a hard failure (except in categories that declare
 #                      'palette: exempt').
 #   STATUS: UNLOCKED   colors may be drafted and no adherence check runs.
-# While UNLOCKED the checker only reports structural problems, so a palette can
-# be shaped freely; LOCKED turns adherence into a hard failure.
 #
 # Format
 #   STATUS: LOCKED|UNLOCKED   enforcement switch (read by TextureCheck)
@@ -32,17 +30,16 @@
 # NAMING
 #   "lapis" is Latin for "stone"; on its own it names no material here.
 #     lapis  = LAPIS LAZULI, the familiar blue mineral. An accent.
-#     lux    = LAPIS LUX, a new mineral added by this mod. Golden and
+#     lux    = LAPIS LUX, a mineral added by this mod. Golden and
 #              self-emissive. It is NOT a variant of lapis lazuli - the two
 #              only share the word "stone", so the ramp names are unrelated.
 # ============================================================================
 
 STATUS: LOCKED
-title: LightCraft core palette (locked 2026-10-17)
-# Locked by the owner on 2026-10-17. Style decisions live in
-# references/style-spec.md. To change a color or rule: propose the change with
-# a PaletteCard render and a checker dry run, ask the owner, and update this
-# file and the spec together.
+title: LightCraft core palette
+# Style decisions live in references/style-spec.md. To change a color or rule:
+# propose the change with a PaletteCard render and a checker dry run, ask the
+# owner, and update this file and the spec together.
 
 # --- Materials --------------------------------------------------------------
 
@@ -129,5 +126,5 @@ FFFDF0  lux.specular
 #             (categories/ores.txt).
 #
 # The intended axis is category x tier. A tier is expressed as EXTRA RAMPS
-# (e.g. an "advanced lapis lux" ramp added later), never as a second palette.
+# (e.g. an "advanced lapis lux" ramp), never as a second palette.
 # ============================================================================

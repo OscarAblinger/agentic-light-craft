@@ -6,7 +6,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 /**
- * Restyle generator - reproduces the approved lapis lux family restyle.
+ * Restyle generator - maps the pre-restyle lapis lux sources onto the current
+ * palette.
  *
  * Reads the pre-restyle source PNGs from a flat source directory (extract
  * them with `git show 85f9094^:<path> > <name>.png`) and writes the restyled
@@ -23,10 +24,10 @@ import java.util.Comparator;
  *   java -cp build/texture-gen RestyleLuxFamily \
  *     .agents/skills/lightcraft-texture-style/palette.txt <srcDir> <outDir>
  *
- * The six outputs are byte-identical to the committed textures in
- * src/main/resources/assets/lightcraft/textures/. Check the items with
- * --category items, the storage blocks with --category blocks, and the ore
- * with --category ores.
+ * Regenerating must reproduce the committed textures in
+ * src/main/resources/assets/lightcraft/textures/ byte-for-byte. Check the
+ * items with --category items, the storage blocks with --category blocks, and
+ * the ore with --category ores.
  */
 public final class RestyleLuxFamily {
 
