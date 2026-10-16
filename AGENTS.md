@@ -37,9 +37,11 @@ and pass its checker before committing.
 - Locked palette: `.agents/skills/lightcraft-texture-style/palette.txt`.
 - Style rules: `.agents/skills/lightcraft-texture-style/references/style-spec.md`.
 - Run the checker (`.agents/skills/lightcraft-texture-style/scripts/TextureCheck.java`)
-  on changed textures and report hard failures and warnings.
-- The palette and style spec are not final until their status says `LOCKED`.
-  Do not invent style decisions; ask the user.
+  with the matching category file from `references/categories/`, and report
+  hard failures and warnings.
+- The palette and style spec are `LOCKED`; `plants` and `ores` are deliberately
+  palette-exempt. Do not invent colours or rules; propose changes and ask the
+  user.
 
 ## Commit Policy
 

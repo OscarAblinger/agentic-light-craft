@@ -1,9 +1,11 @@
 # LightCraft texture palette
 # ============================================================================
 # THE single source of truth for every color used in LightCraft textures.
-# Do not hard-code a color anywhere else. To use a new color: add it here, on
-# the right ramp, with a note saying what it is for - then draw it through
-# scripts/TextureLib.java by name.
+# Machines, items and material blocks draw every pixel from here. Ore stone and
+# plants are deliberately exempt and keep their own colours (see CATEGORY USAGE
+# below and references/categories/). Do not hard-code any other color anywhere
+# else. To use a new color: add it here, on the right ramp, with a note saying
+# what it is for - then draw it through scripts/TextureLib.java by name.
 #
 # Each ramp carries:
 #   # use:  what the ramp is for, and where it may appear
@@ -13,10 +15,11 @@
 # ----------------------------------------------------------------------------
 # STATUS
 #   STATUS: LOCKED     TextureCheck enforces this palette; off-palette pixels
-#                      are a hard failure.
+#                      are a hard failure (except in categories that declare
+#                      'palette: exempt').
 #   STATUS: UNLOCKED   colors may be drafted and no adherence check runs.
-# While UNLOCKED the checker only reports structural problems, so the palette
-# can be shaped freely. Flip to LOCKED once the style is agreed.
+# While UNLOCKED the checker only reports structural problems, so a palette can
+# be shaped freely; LOCKED turns adherence into a hard failure.
 #
 # Format
 #   STATUS: LOCKED|UNLOCKED   enforcement switch (read by TextureCheck)
@@ -34,8 +37,12 @@
 #              only share the word "stone", so the ramp names are unrelated.
 # ============================================================================
 
-STATUS: UNLOCKED
-title: LightCraft core palette (draft)
+STATUS: LOCKED
+title: LightCraft core palette (locked 2026-10-17)
+# Locked by the owner on 2026-10-17. Style decisions live in
+# references/style-spec.md. To change a color or rule: propose the change with
+# a PaletteCard render and a checker dry run, ask the owner, and update this
+# file and the spec together.
 
 # --- Materials --------------------------------------------------------------
 
@@ -90,23 +97,36 @@ FFFDF0  lux.specular
 # --- Structure --------------------------------------------------------------
 
 [outline]
-# use:  dark structural edges only - recessed gaps, firebox surrounds, and item
-#       outlines where a silhouette must read against any background.
-# rule: NOT a general border. Prefer bevel shading to outlining on blocks and
-#       machines; reserve this ramp for parts that must visually separate.
+# use:  dark structural edges only - recessed gaps, firebox surrounds, the
+#       single-pixel recessed edge of a machine front (see
+#       examples/machine_front_01..03), and item outlines where a silhouette
+#       must read against any background.
+# rule: never a fill and never a thick border. Casing and side faces that tile
+#       stay ring-free and bevel instead; only a front face carries the 1px
+#       recessed edge.
 1B2130  outline.deep
 2C3448  outline.mid
 
 # ============================================================================
-# CATEGORY USAGE  (summary - full rules belong in references/style-spec.md)
+# CATEGORY USAGE  (summary - full rules in references/style-spec.md and
+# references/categories/)
 #
 # Categories share this one palette; they differ in RULES, not in colors.
 #
 #   items     transparent background. Dark outline so the silhouette reads at
-#             16px on any background. Low color budget. Light from top-left.
+#             16px on any background. Low color budget (16). Light from
+#             top-left. Partial transparency allowed for deliberate soft glow.
 #   machines  opaque. Marble body + bright gold and lapis accents (no steel).
-#             Emissive lux for windows. Prefer bevel shading over outlining.
-#             Textures must tile seamlessly.
+#             Emissive lux windows; bevel shading. A machine front may carry
+#             the 1px dark recessed edge; casing/side faces stay ring-free.
+#             Faces tile seamlessly. No partial transparency.
+#   blocks    solid material blocks (storage blocks): opaque, tiling, drawn
+#             from the same ramps as machines and items.
+#   plants    PALETTE-EXEMPT - own greens/browns/petal colours; structural
+#             checks only (categories/plants.txt).
+#   ores      PALETTE-EXEMPT for the stone background (byte-identical to the
+#             source art); lux specks still come from the lux/gold ramps
+#             (categories/ores.txt).
 #
 # The intended axis is category x tier. A tier is expressed as EXTRA RAMPS
 # (e.g. an "advanced lapis lux" ramp added later), never as a second palette.

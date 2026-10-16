@@ -1,0 +1,50 @@
+# LightCraft texture category: BLOCKS  (tier: basic)
+# ============================================================================
+# A category file does not define colors. It selects which ramps from
+# ../palette.txt a category may use and sets the rules for how it draws.
+# A category may only RESTRICT the palette - never invent colors - except where
+# it declares 'palette: exempt' (see plants.txt and ores.txt).
+#
+# Directive lines (read by TextureCheck --category):
+#   name:         category name (label only)
+#   tier:         basic | advanced (advanced adds extra ramps, not a new palette)
+#   allow:        comma-separated ramps from palette.txt this category may use
+#   palette:      exempt = skip palette adherence (default: enforce)
+#   opaque-only:  true = no partial transparency allowed (hard failure)
+#   tiling:       required | none (none suppresses the seam warning)
+#   max-colors:   soft limit on distinct colors per texture
+# All other lines are comments and describe human-reviewed rules.
+# ============================================================================
+
+name: blocks
+tier: basic
+allow: marble, lapis, gold, lux, outline
+opaque-only: true
+tiling: required
+max-colors: 24
+
+# --- How a material block is built ------------------------------------------
+#
+# WHAT      Full 16x16 cube faces for solid material blocks - the lapis lux
+#           storage blocks (raw and ingot) and similar plain blocks. Ores are
+#           a separate category (ores.txt) because their stone background is
+#           palette-exempt.
+#
+# BODY      Draw from the same ramps as machines and items so the whole set
+#           reads as one world: lux/gold for lapis lux blocks, marble for
+#           stone blocks.
+#
+# SHADING   Bevel instead of outline: specular top-left, deep bottom-right.
+#           Do not draw a border ring around the face - storage blocks must
+#           read level next to each other in a wall.
+#
+# OPAQUE    Full blocks are opaque: alpha 0 or 255 only (directive:
+#           opaque-only: true).
+#
+# TILING    Faces must tile seamlessly (directive: tiling: required). Review
+#           the *.3x3.png preview.
+#
+# LIGHT     Top-left, consistent with everything else.
+#
+# ADVANCED  Reuses this palette with extra ramps when needed; no second palette.
+# ============================================================================
