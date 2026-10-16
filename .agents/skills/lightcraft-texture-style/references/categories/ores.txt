@@ -25,15 +25,14 @@ max-colors: 24
 
 # --- How an ore block is built ----------------------------------------------
 #
-# PALETTE   EXEMPT on purpose (owner decision). The stone background keeps its
-#           source colours byte-identical and must never be restyled; those
-#           greys are outside the core palette. The lux specks are still
-#           intended to come from the lux/gold ramps - the exemption exists
-#           for the stone, not as a licence for arbitrary new colours.
+# PALETTE   EXEMPT on purpose. The stone background keeps its source-art
+#           colours byte-identical and must never be restyled; those greys are
+#           outside the core palette. The lux specks are still intended to
+#           come from the lux/gold ramps - the exemption exists for the stone,
+#           not as a licence for arbitrary new colours.
 #
-# WHAT      16x16 full block faces. lapis_lux_ore.png copies its stone from
-#           the source art verbatim with small lux specks scattered through
-#           it (see generators/RestyleLuxFamily.java).
+# WHAT      16x16 full block faces. lapis_lux_ore.png keeps its stone pixels
+#           verbatim and scatters small lux specks through them.
 #
 # OPAQUE    Full blocks are opaque: alpha 0 or 255 only (directive:
 #           opaque-only: true).

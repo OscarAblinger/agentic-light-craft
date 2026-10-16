@@ -15,8 +15,8 @@ import java.nio.file.Path;
  *     .agents/skills/lightcraft-texture-style/palette.txt \
  *     .agents/skills/lightcraft-texture-style/examples
  *
- * Outputs machine_front_01..03.png, byte-identical to the committed examples.
- * Check with --category machines.
+ * Outputs machine_front_01..03.png; regenerating must reproduce the committed
+ * examples byte-for-byte. Check with --category machines.
  */
 public final class MachineFronts {
 
@@ -25,7 +25,7 @@ public final class MachineFronts {
             "marble.mid", "marble.shadow", "marble.deep"
     };
 
-    // The approved front look: marble base, no steel.
+    // The machine front look: marble base, no steel.
     private static final String FRAME_LIGHT = "marble.specular";
     private static final String FRAME_DARK = "marble.deep";
     private static final String SHINE = "marble.specular";
@@ -62,9 +62,9 @@ public final class MachineFronts {
     }
 
     /**
-     * A machine front: 1px outline.deep recessed edge ring (the approved front
-     * look), a marble frame with a top-left shine, and a diagonal marble body
-     * to draw the machine-specific features on.
+     * A machine front: 1px outline.deep recessed edge ring, a marble frame with
+     * a top-left shine, and a diagonal marble body to draw the machine-specific
+     * features on.
      */
     private static BufferedImage panel() {
         BufferedImage img = TextureLib.canvas(16, 16);

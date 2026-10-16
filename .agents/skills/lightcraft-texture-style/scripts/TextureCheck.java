@@ -101,8 +101,8 @@ public final class TextureCheck {
             status = null;
         }
         // Enforcement is driven by STATUS when present, so a draft palette may
-        // hold colors without failing every texture. Without a STATUS line we
-        // keep the old behaviour: a non-empty palette is treated as locked.
+        // hold colors without failing every texture. Without a STATUS line, a
+        // non-empty palette is treated as locked.
         boolean paletteLocked = "LOCKED".equals(status)
                 || (status == null && !palette.isEmpty());
 

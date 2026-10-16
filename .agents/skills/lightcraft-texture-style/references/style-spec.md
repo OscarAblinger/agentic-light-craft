@@ -1,22 +1,20 @@
 # LightCraft Texture Style Specification
 
-> **Status: LOCKED (2026-10-17).** Every decision below was made by the project
-> owner. Follow it; if a rule you need is missing, ask the owner - do not invent
-> one. Color values live in `../palette.txt` (also `STATUS: LOCKED`);
-> per-category drawing rules live in `categories/`.
+> Follow this spec for every texture in the mod. Color values live in
+> `../palette.txt`; per-category drawing rules live in `categories/`. If a rule
+> you need is missing, ask the owner - do not invent one.
 
 ## 1. References & anchors
 
-- **Anchors / gold standard:** `examples/machine_front_01..03.png` (three
-  unnamed machine fronts). They define the look: marble body and frame, a 1px
-  `outline.deep` recessed edge around the front face, bright gold and lapis
-  accents, emissive lux windows, no steel.
+- **Anchors / reference fronts:** `examples/machine_front_01..03.png`. They
+  define the look: marble body and frame, a 1px `outline.deep` recessed edge
+  around the front face, bright gold and lapis accents, emissive lux windows,
+  no steel.
 - **Mood:** light and powered-up - the set reads bright, not grimy.
 - **Anti-references (must NOT look like):** steel or other substitute-metal
   trim; dull, desaturated surfaces; dithering or noise/grain fills; dark
-  full-range outlines around a whole asset (the rejected first restyle
-  attempts); gold/gold-brown border frames on machines (rejected in favour of
-  the marble bevel).
+  full-range outlines around a whole asset; gold/gold-brown border frames on
+  machines.
 
 ## 2. Palette
 
@@ -30,9 +28,9 @@
   hue-shift manually - pick from the steps.
 - **Accents:** lapis and gold stay small so they pop; `gold.deepest` and
   `gold.dark` are shadow-only 1px lines; `lux.*` is emissive.
-- **Exempt materials (owner decision):** ore stone (byte-identical to the
-  source art) and plants (own greens/browns/petal colours). See their
-  category files; the checker skips palette adherence there.
+- **Exempt materials:** ore stone (keeps its source-art colours byte-identical)
+  and plants (own greens/browns/petal colours). See their category files; the
+  checker skips palette adherence there.
 - **Color budget (soft):** items 16; machines/blocks/ores 24; plants 64
   (loose guard only). The checker warns above the budget. It counts distinct
   RGBA values, so alpha variants count separately.
@@ -41,9 +39,9 @@
 
 - **Outline:** items get a dark outline (`outline.deep`, or `outline.mid` for a
   softer edge). A machine front face may carry the 1px `outline.deep` recessed
-  edge ring (as the anchors do); casing and side faces that tile stay
-  ring-free. Storage blocks bevel only - no ring. `outline.*` is never a fill,
-  a shadow, or a thick border.
+  edge ring; casing and side faces that tile stay ring-free. Storage blocks
+  bevel only - no ring. `outline.*` is never a fill, a shadow, or a thick
+  border.
 - **Light:** top-left everywhere.
 - **Anti-aliasing / alpha:**
   - Full blocks (machines, blocks, ores): alpha 0 or 255 only - partial
@@ -61,14 +59,14 @@
 
 ## 4. Geometry & resolution
 
-- **Canvas:** 16x16 for blocks and items (everything in use today). No other
-  sizes until the owner approves one.
+- **Canvas:** 16x16 for blocks and items. No other sizes until the owner
+  approves one.
 - **Mixels:** none - single resolution; never fake 32x32 detail inside 16x16
   and never scale sub-parts.
 - **Silhouette:** items must read at 16px on any background; block faces must
   read level and tile.
-- **Not used yet:** entities, GUI icons, animated textures. No rules are
-  locked for them; ask the owner when the first one is made.
+- **Entities, GUI icons, animated textures:** no rules yet - ask the owner
+  before making the first one.
 
 ## 5. Tiling & continuity
 
@@ -77,12 +75,12 @@
 - **Tolerance:** the checker warns when opposing edges differ by more than
   ~48 average RGB. Treat it as a review trigger: look at the `*.3x3.png`
   preview.
-- **Related assets** stay in one family (ore -> raw -> refined). The approved
-  lapis lux restyle is the reference: refined pieces use the bright window,
-  raw pieces the mild window, the ore keeps its stone byte-identical with
-  medium lux specks, and storage blocks replace the outermost pixel ring with
-  interior colours so they read level in a wall.
-- **Overlay / connectivity textures:** none in use.
+- **Related assets** stay in one family (ore -> raw -> refined): refined pieces
+  use the bright window, raw pieces the mild window, the ore keeps its stone
+  pixels untouched with medium lux specks, and storage blocks replace the
+  outermost pixel ring with interior colours so they read level in a wall.
+- **Overlay / connectivity textures:** no rules - ask the owner before
+  making one.
 
 ## 6. Category specifics
 
@@ -102,14 +100,14 @@
 - Block textures: `src/main/resources/assets/lightcraft/textures/block/<name>.png`
 - Item textures: `src/main/resources/assets/lightcraft/textures/item/<name>.png`
 - `snake_case` names matching the registry name; namespace `lightcraft`.
-- `.mcmeta` files only for animated textures (none exist yet).
+- `.mcmeta` files only for animated textures.
 
 ## 8. Workflow & tooling
 
-- **Generators are committed** under
+- **Generators** live under
   `.agents/skills/lightcraft-texture-style/generators/` - one Java file per
-  texture family, committed together with the textures it produces. The two
-  committed generators reproduce their outputs byte-for-byte.
+  texture family, committed together with the textures it produces.
+  Regenerating must reproduce the committed files byte-for-byte.
 - **Run Java tooling** from the repository root (JDK 25):
 
   ```bash
@@ -128,17 +126,11 @@
   `--category`; see `SKILL.md`.
 - **Review:** the checker writes `*.8x.png` and `*.3x3.png` previews; they must
   be reviewed by a viewer with vision before commit.
-- **Determinism:** fixed seeds; regenerating must reproduce the committed
-  files.
 
-## 9. Governance
+## 9. Exceptions & approval
 
-- **Scope:** every texture in the mod.
-- **Current state:** the lapis lux family is on-palette (approved restyle);
-  ore stone and plants are exempt by category. Nothing is outstanding.
-- **Exceptions:** none for third-party or vanilla-derived textures today. If
-  one is added, record it here and mark the file's category exempt.
+- **Exceptions:** if a third-party or vanilla-derived texture can never follow
+  this style, record it here and mark its category exempt.
 - **Approval:** the project owner approves aesthetic changes and owns this
-  file and `palette.txt`. Propose changes with a `PaletteCard` render and a
-  checker dry run, and update both files together so their status stays in
-  sync.
+  file and `../palette.txt`. Propose changes with a `PaletteCard` render and a
+  checker dry run, and update both files together.

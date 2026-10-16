@@ -1,9 +1,9 @@
 # Canonical reference textures (style anchors) live here.
 #
-# These are the visual "gold standard" for the LightCraft look. Agents compare
+# These are the reference textures for the LightCraft look. Agents compare
 # new work against them and the style spec, not against their own taste.
 #
-# The files are deliberately unnamed (no machine names). They show the machine
+# They are style references, not specific machines. They show the machine
 # look: marble body and frame, a 1px outline.deep recessed edge around the
 # front face, bright gold and lapis accents, emissive lux, no steel.
 #
@@ -16,5 +16,5 @@
 #                           square lapis core with a lux centre, a recessed
 #                           outline.deep slot below.
 #
-# Check them with --category machines (they pass). Regenerate them with
-# generators/MachineFronts.java; the files should come out byte-identical.
+# Check them with --category machines; regenerate them with
+# generators/MachineFronts.java (byte-identical output).
