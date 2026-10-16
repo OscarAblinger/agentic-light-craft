@@ -2,7 +2,7 @@
 
 `scripts/TextureCheck.java` separates objective problems from judgement calls.
 Hard rules fail the task; soft rules warn and are reviewed by a human. With
-`--strict`, warnings also fail (use it in verification).
+`--strict`, warnings also fail (use it when no warning is expected).
 
 ## Hard failures (objective)
 
@@ -10,17 +10,30 @@ Hard rules fail the task; soft rules warn and are reviewed by a human. With
 |------|--------|
 | Readable PNG | The file must be a valid PNG that `ImageIO` can decode. |
 | Dimensions | Width and height must each be a power of two, and the image must be square **or** an animation multiple (`height % width == 0`). |
-| Palette adherence | Every opaque pixel must be a color from `palette.txt` when that file says `STATUS: LOCKED` (or has colors and no `STATUS` line). Skipped while `STATUS` is `UNLOCKED`. |
-| Category ramps | With `--category`, a color whose ramp is not in the category's `allow:` list is a failure (same as off-palette). |
-| Opaque-only (opt-in) | With `--opaque-only`, any pixel with alpha `1–254` is a failure. |
+| Palette adherence | Every non-transparent pixel (alpha > 0) must be a color from `palette.txt` when that file says `STATUS: LOCKED` (or has colors and no `STATUS` line). Skipped while `STATUS` is `UNLOCKED` and for categories that declare `palette: exempt`. |
+| Category ramps | With `--category`, a color whose ramp is not in the category's `allow:` list is a failure (same as off-palette). Not applied when the category is `palette: exempt`. |
+| Opaque-only (opt-in) | With `--opaque-only`, or when the category says `opaque-only: true`, any pixel with alpha `1–254` is a failure. |
 
 ## Warnings (judgement / review)
 
 | Rule | Detail |
 |------|--------|
-| Partial transparency | Any pixel with alpha `1–254` is reported for confirmation. |
-| Distinct color count | More than `--max-colors` (default 24) distinct colors is reported. |
-| Possible seam | Opposite edges differ by more than ~48 average RGB; review tiling in the `*.3x3.png` preview. |
+| Partial transparency | Any pixel with alpha `1–254` is reported for confirmation (unless opaque-only applies, where it is a hard failure instead). |
+| Distinct color count | More than the budget distinct RGBA values are reported; alpha variants count separately. Default 24; override with `--max-colors` or the category's `max-colors:`. |
+| Possible seam | Opposite edges differ by more than ~48 average RGB; review tiling in the `*.3x3.png` preview. Suppressed when the category says `tiling: none`. |
+
+Expected warnings on approved art: partial transparency in `items` and `plants`
+is intentional (soft glow / soft edges) and is reported only for confirmation.
+
+## Category directives that change enforcement
+
+- `palette: exempt` - skip palette adherence and `allow:` filtering (used by
+  `plants` and `ores`; structural checks still run).
+- `opaque-only: true` - partial transparency becomes a hard failure (full
+  block categories).
+- `tiling: none` - suppress the seam warning (items, plants).
+- `max-colors: n` - per-category soft budget (items 16, machines/blocks/ores
+  24, plants 64).
 
 ## Heuristics that remain human-reviewed
 

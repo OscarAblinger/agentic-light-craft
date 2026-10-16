@@ -2,13 +2,16 @@
 # ============================================================================
 # A category file does not define colors. It selects which ramps from
 # ../palette.txt a category may use and sets the rules for how it draws.
-# A category may only RESTRICT the palette - never invent colors.
+# A category may only RESTRICT the palette - never invent colors - except where
+# it declares 'palette: exempt' (see plants.txt and ores.txt).
 #
 # Directive lines (read by TextureCheck --category):
 #   name:         category name (label only)
 #   tier:         basic | advanced (advanced adds extra ramps, not a new palette)
 #   allow:        comma-separated ramps from palette.txt this category may use
-#   opaque-only:  true = no partial transparency allowed
+#   palette:      exempt = skip palette adherence (default: enforce)
+#   opaque-only:  true = no partial transparency allowed (hard failure)
+#   tiling:       required | none (none suppresses the seam warning)
 #   max-colors:   soft limit on distinct colors per texture
 # All other lines are comments and describe human-reviewed rules.
 # ============================================================================
@@ -17,14 +20,18 @@ name: items
 tier: basic
 allow: marble, lapis, gold, lux, outline
 opaque-only: false
+tiling: none
 max-colors: 16
 
 # --- How a basic item is built ----------------------------------------------
 #
 # BACKGROUND Items sit on a transparent background - only the object is drawn.
-#            Leave every other pixel fully transparent (alpha 0). Do not use
-#            partial transparency as a shadow; use outline.mid if a soft edge
-#            is truly needed.
+#            Leave every other pixel fully transparent (alpha 0).
+#
+# ALPHA      Partial transparency (alpha 1-254) is allowed for items, typically
+#            as deliberate soft glow or soft edges (for example the lapis lux
+#            gems). The checker reports partial pixels for confirmation. Full
+#            blocks forbid partial alpha entirely (see blocks/machines/ores).
 #
 # SILHOUETTE The shape must read at 16px on any inventory background. Give the
 #            object a dark outline (outline.deep, or outline.mid for a softer
@@ -40,8 +47,10 @@ max-colors: 16
 # MATERIALS Use the same materials as machines so the set feels like one world:
 #            marble for stone parts, gold for metal parts, lapis for gems, and
 #            lux for anything that emits (for example a lapis-lux ingot).
+#            Luxflower petals, seeds and petal bundles are plant items - they
+#            use the plants category instead.
 #
-# TILING    Not applicable - items do not tile.
+# TILING    Not applicable - items do not tile (directive: tiling: none).
 #
 # ADVANCED  The advanced tier adds ramps (for example a brighter lapis lux) and
 #           reuses this same base palette. It does not get its own palette.

@@ -1,0 +1,51 @@
+# LightCraft texture category: PLANTS  (tier: basic)
+# ============================================================================
+# A category file does not define colors. It selects which ramps from
+# ../palette.txt a category may use and sets the rules for how it draws.
+# A category may only RESTRICT the palette - never invent colors - except where
+# it declares 'palette: exempt' (see plants.txt and ores.txt).
+#
+# Directive lines (read by TextureCheck --category):
+#   name:         category name (label only)
+#   tier:         basic | advanced (advanced adds extra ramps, not a new palette)
+#   allow:        comma-separated ramps from palette.txt this category may use
+#   palette:      exempt = skip palette adherence (default: enforce)
+#   opaque-only:  true = no partial transparency allowed (hard failure)
+#   tiling:       required | none (none suppresses the seam warning)
+#   max-colors:   soft limit on distinct colors per texture
+# All other lines are comments and describe human-reviewed rules.
+# ============================================================================
+
+name: plants
+tier: basic
+palette: exempt
+opaque-only: false
+tiling: none
+max-colors: 64
+
+# --- How a plant is built ---------------------------------------------------
+#
+# PALETTE   EXEMPT on purpose (owner decision): plants keep their own greens,
+#           browns and petal colours instead of being forced into the core
+#           palette. The checker skips palette adherence for this category;
+#           the structural checks (dimensions, transparency reporting, budget)
+#           still run. This is one of only two exemptions - the other is the
+#           ore stone background (ores.txt).
+#
+# WHAT      The luxflower crop stages (block/luxflower_stage0..7.png, 16x16
+#           cross-model textures) and their drop items (luxflower_petal,
+#           luxflower_seeds, petal_bundle, small_petal_bundle,
+#           double_petal_bundle, triple_petal_bundle, quadruple_petal_bundle).
+#
+# ALPHA     Partial transparency is allowed, as for items - typically soft
+#           glow or soft petal edges. The checker reports partial pixels for
+#           confirmation.
+#
+# LIGHT     Top-left, consistent with everything else. Later luxflower stages
+#           are brighter (the bloom emits light).
+#
+# BUDGET    Loose cap (64); it only guards runaway noise on small art.
+#
+# TILING    Not applicable - crops use cross models and items do not tile
+#           (directive: tiling: none).
+# ============================================================================

@@ -2,13 +2,16 @@
 # ============================================================================
 # A category file does not define colors. It selects which ramps from
 # ../palette.txt a category may use and sets the rules for how it draws.
-# A category may only RESTRICT the palette - never invent colors.
+# A category may only RESTRICT the palette - never invent colors - except where
+# it declares 'palette: exempt' (see plants.txt and ores.txt).
 #
 # Directive lines (read by TextureCheck --category):
 #   name:         category name (label only)
 #   tier:         basic | advanced (advanced adds extra ramps, not a new palette)
 #   allow:        comma-separated ramps from palette.txt this category may use
-#   opaque-only:  true = no partial transparency allowed
+#   palette:      exempt = skip palette adherence (default: enforce)
+#   opaque-only:  true = no partial transparency allowed (hard failure)
+#   tiling:       required | none (none suppresses the seam warning)
 #   max-colors:   soft limit on distinct colors per texture
 # All other lines are comments and describe human-reviewed rules.
 # ============================================================================
@@ -17,13 +20,14 @@ name: machines
 tier: basic
 allow: marble, lapis, gold, lux, outline
 opaque-only: true
+tiling: required
 max-colors: 24
 
 # --- How a basic machine is built -------------------------------------------
 #
 # BODY      Marble carries the machine. The casing/panel/frame is marble, and
 #           most of the surface is marble.light / marble.mid. Use the marble
-#           bevel (specular top-left, deep bottom-right) instead of an outline
+#           bevel (specular top-left, deep bottom-right) instead of outlines
 #           to separate the frame from the body.
 #
 # ACCENTS   Gold and lapis are accents only - small areas that pop against the
@@ -34,15 +38,21 @@ max-colors: 24
 # LIGHT     lux.* is emissive. Windows and lens centres ramp outward from
 #           lux.specular. A machine that does work should look lit.
 #
-# OUTLINE   outline.* is for recessed gaps and firebox surrounds only. Do NOT
-#           draw a dark border around the whole block - that reads as an item,
-#           not a block.
+# FRONT     A machine FRONT face may carry a single 1px outline.deep recessed
+#           edge ring around the whole face - that is what the approved
+#           anchors in examples/machine_front_01..03 do. Casing and side faces
+#           that tile in walls stay ring-free and bevel instead. outline.* is
+#           never a thick border, a fill, or a shadow.
+#
+# OPAQUE    Full blocks are opaque: alpha 0 or 255 only. Partial transparency
+#           is a hard failure for this category (directive: opaque-only: true).
 #
 # NO STEEL  There is no metal/steel ramp. Do not approximate one with gold or
 #           outline; the base material is marble.
 #
-# TILING    Block faces must tile seamlessly. Review the *.3x3.png preview.
-#           The checker warns when opposing edges differ strongly.
+# TILING    Block faces must tile seamlessly (directive: tiling: required).
+#           Review the *.3x3.png preview. The checker warns when opposing
+#           edges differ strongly.
 #
 # LIGHT DIR Top-left, consistent with items.
 #

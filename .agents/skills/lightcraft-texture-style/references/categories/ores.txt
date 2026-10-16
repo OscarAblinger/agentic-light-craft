@@ -1,0 +1,45 @@
+# LightCraft texture category: ORES  (tier: basic)
+# ============================================================================
+# A category file does not define colors. It selects which ramps from
+# ../palette.txt a category may use and sets the rules for how it draws.
+# A category may only RESTRICT the palette - never invent colors - except where
+# it declares 'palette: exempt' (see plants.txt and ores.txt).
+#
+# Directive lines (read by TextureCheck --category):
+#   name:         category name (label only)
+#   tier:         basic | advanced (advanced adds extra ramps, not a new palette)
+#   allow:        comma-separated ramps from palette.txt this category may use
+#   palette:      exempt = skip palette adherence (default: enforce)
+#   opaque-only:  true = no partial transparency allowed (hard failure)
+#   tiling:       required | none (none suppresses the seam warning)
+#   max-colors:   soft limit on distinct colors per texture
+# All other lines are comments and describe human-reviewed rules.
+# ============================================================================
+
+name: ores
+tier: basic
+palette: exempt
+opaque-only: true
+tiling: required
+max-colors: 24
+
+# --- How an ore block is built ----------------------------------------------
+#
+# PALETTE   EXEMPT on purpose (owner decision). The stone background keeps its
+#           source colours byte-identical and must never be restyled; those
+#           greys are outside the core palette. The lux specks are still
+#           intended to come from the lux/gold ramps - the exemption exists
+#           for the stone, not as a licence for arbitrary new colours.
+#
+# WHAT      16x16 full block faces. lapis_lux_ore.png copies its stone from
+#           the source art verbatim with small lux specks scattered through
+#           it (see generators/RestyleLuxFamily.java).
+#
+# OPAQUE    Full blocks are opaque: alpha 0 or 255 only (directive:
+#           opaque-only: true).
+#
+# TILING    Faces must tile seamlessly (directive: tiling: required).
+#
+# LIGHT     The specks are the light source of the block; keep them small and
+#           bright against the untouched stone.
+# ============================================================================
