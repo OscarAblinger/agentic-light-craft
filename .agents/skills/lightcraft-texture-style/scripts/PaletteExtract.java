@@ -61,7 +61,7 @@ public final class PaletteExtract {
             collectPngs(in, files);
         }
 
-        Map<Integer, long[]> counts = new LinkedHashMap<>();
+        Map<Integer, Long> counts = new LinkedHashMap<>();
         for (Path f : files) {
             BufferedImage img;
             try {
@@ -81,19 +81,19 @@ public final class PaletteExtract {
                         continue;
                     }
                     int rgb = argb & 0xFFFFFF;
-                    counts.computeIfAbsent(rgb, k -> new long[1])[0]++;
+                    counts.merge(rgb, 1L, Long::sum);
                 }
             }
         }
 
-        List<Map.Entry<Integer, long[]>> sorted = new ArrayList<>(counts.entrySet());
-        sorted.sort((a, b) -> Long.compare(b.getValue()[0], a.getValue()[0]));
-        List<long[]> clusters = new ArrayList<>();
+        List<Map.Entry<Integer, Long>> sorted = new ArrayList<>(counts.entrySet());
+        sorted.sort((a, b) -> Long.compare(b.getValue(), a.getValue()));
+        List<Long> clusters = new ArrayList<>();
         List<Integer> reps = new ArrayList<>();
         List<int[]> sum = new ArrayList<>();
-        for (Map.Entry<Integer, long[]> e : sorted) {
+        for (Map.Entry<Integer, Long> e : sorted) {
             int rgb = e.getKey();
-            long n = e.getValue()[0];
+            long n = e.getValue();
             int found = -1;
             for (int i = 0; i < reps.size(); i++) {
                 if (dist(rgb, reps.get(i)) <= merge) {
@@ -103,10 +103,10 @@ public final class PaletteExtract {
             }
             if (found < 0) {
                 reps.add(rgb);
-                clusters.add(new long[]{n});
+                clusters.add(n);
                 sum.add(new int[]{rgb >> 16 & 0xFF, rgb >> 8 & 0xFF, rgb & 0xFF});
             } else {
-                clusters.get(found)[0] += n;
+                clusters.set(found, clusters.get(found) + n);
                 int[] s = sum.get(found);
                 s[0] += rgb >> 16 & 0xFF;
                 s[1] += rgb >> 8 & 0xFF;
@@ -115,8 +115,8 @@ public final class PaletteExtract {
         }
 
         long total = 0;
-        for (long[] c : clusters) {
-            total += c[0];
+        for (long c : clusters) {
+            total += c;
         }
 
         System.out.println("Files: " + files.size() + "  distinct colors: " + reps.size()
@@ -125,15 +125,14 @@ public final class PaletteExtract {
         System.out.printf("%-9s %10s %7s  %s%n", "hex", "pixels", "pct", "hsv(h,s,v)");
         int shown = 0;
         for (int i = 0; i < reps.size() && shown < top; i++) {
-            long n = clusters.get(i)[0];
+            long n = clusters.get(i);
             if (n < minCount) {
                 continue;
             }
             int[] s = sum.get(i);
-            long cn = clusters.get(i)[0];
-            int r = (int) (s[0] / cn);
-            int g = (int) (s[1] / cn);
-            int b = (int) (s[2] / cn);
+            int r = (int) (s[0] / n);
+            int g = (int) (s[1] / n);
+            int b = (int) (s[2] / n);
             if (merge == 0) {
                 r = reps.get(i) >> 16 & 0xFF;
                 g = reps.get(i) >> 8 & 0xFF;

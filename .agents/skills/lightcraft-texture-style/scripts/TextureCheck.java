@@ -26,20 +26,8 @@ import java.util.regex.Pattern;
  *     --preview build/texture-previews \
  *     src/main/resources/assets/lightcraft/textures
  *
- * Hard checks (exit code 1):
- *   - the file cannot be read as a PNG
- *   - dimensions are not a power of two, or are neither square nor an
- *     animation multiple (height % width == 0)
- *   - the texture uses a color outside the locked palette
- *   - --opaque-only is set and the texture uses partial transparency
- *
- * Soft checks (warnings; fail only with --strict):
- *   - the texture uses partial transparency
- *   - the texture uses more than --max-colors distinct colors
- *   - opposing edges differ strongly (possible visible tiling seam; a category
- *     may set 'tiling: none' to skip this check)
- *
- * See references/checker-policy.md for the policy behind this split.
+ * See references/checker-policy.md for the hard/soft rule split and the
+ * category-file directives.
  */
 public final class TextureCheck {
 
@@ -367,9 +355,8 @@ public final class TextureCheck {
                            String status) {
     }
 
-    private record Category(String name, String tier, Set<String> allow,
-                            boolean opaqueOnly, Integer maxColors,
-                            boolean paletteExempt, String tiling) {
+    private record Category(String name, Set<String> allow, boolean opaqueOnly,
+                            Integer maxColors, boolean paletteExempt, String tiling) {
     }
 
     private static Palette loadPalette(Path file) throws IOException {
@@ -408,7 +395,6 @@ public final class TextureCheck {
 
     private static Category loadCategory(Path file) throws IOException {
         String name = file.getFileName().toString();
-        String tier = null;
         Set<String> allow = new LinkedHashSet<>();
         boolean opaqueOnly = false;
         boolean paletteExempt = false;
@@ -431,7 +417,6 @@ public final class TextureCheck {
                         name = value;
                     }
                 }
-                case "tier" -> tier = value;
                 case "allow" -> {
                     for (String r : value.split("[,\\s]+")) {
                         if (!r.isEmpty()) {
@@ -444,12 +429,12 @@ public final class TextureCheck {
                 case "tiling" -> tiling = value;
                 case "max-colors" -> maxColors = Integer.parseInt(value);
                 default -> {
-                    // Other keys (outline, light, ...) are human-reviewed rules.
+                    // Unknown directives are ignored.
                 }
             }
         }
-        return new Category(name, tier, allow, opaqueOnly, maxColors,
-                paletteExempt, tiling);
+        return new Category(name, allow, opaqueOnly, maxColors, paletteExempt,
+                tiling);
     }
 
     /**

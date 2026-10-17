@@ -18,7 +18,8 @@
 
 ## 2. Palette
 
-- **Source of truth:** `../palette.txt`. One palette for every category.
+- **Source of truth:** `../palette.txt`. One palette for every category; an
+  "advanced" tier adds extra ramps to it, never a second palette.
 - **Ramps:** marble (7 colors), lapis (6), gold (6), lux (4), outline (2).
   Each is ordered dark -> light and carries `use:` / `rule:` notes - read them.
 - **Shading steps:** use as many steps as the element needs (2-tone bolt,
@@ -53,9 +54,9 @@
   features (for example `marble.vein`).
 - **Emissive:** `lux.*` is self-lit; ramp outward from `lux.specular` at the
   centre. Never shade a lux color with a non-lux color.
-- **Human-reviewed heuristics** (not checker rules): no banding or pillow
-  shading; consistent diagonal steps (no jaggies); silhouette readability at
-  in-game size.
+- **Human-reviewed heuristics** (not checker rules): banding, pillow or
+  pancake shading; unnecessary dithering; jaggy line steps and curve quality;
+  silhouette readability at in-game size.
 
 ## 4. Geometry & resolution
 
@@ -92,9 +93,6 @@
 | plants | `categories/plants.txt` | palette-exempt; luxflower stages and plant items |
 | ores | `categories/ores.txt` | palette-exempt stone, opaque, tiling |
 
-- Entities, GUI icons and animated textures: see section 4.
-- Advanced tiers add extra ramps to this palette; they never get a second one.
-
 ## 7. Naming & file conventions
 
 - Block textures: `src/main/resources/assets/lightcraft/textures/block/<name>.png`
@@ -107,21 +105,8 @@
 - **Generators** live under
   `.agents/skills/lightcraft-texture-style/generators/` - one Java file per
   texture family, committed together with the textures it produces.
-  Regenerating must reproduce the committed files byte-for-byte.
-- **Run Java tooling** from the repository root (JDK 25):
-
-  ```bash
-  javac -d build/texture-gen \
-    .agents/skills/lightcraft-texture-style/generators/<Name>.java \
-    .agents/skills/lightcraft-texture-style/scripts/TextureLib.java
-  java -cp build/texture-gen <Name> \
-    .agents/skills/lightcraft-texture-style/palette.txt <outDir>
-  ```
-
-  `RestyleLuxFamily` takes an extra `<srcDir>` argument (the pre-restyle
-  sources) before `<outDir>`; `generators/README.md` has the exact
-  invocations.
-
+  Regenerating must reproduce the committed files byte-for-byte; run them from
+  the repository root (JDK 25) as shown in `generators/README.md`.
 - **Checker:** `scripts/TextureCheck.java` with `--palette` and the matching
   `--category`; see `SKILL.md`.
 - **Review:** the checker writes `*.8x.png` and `*.3x3.png` previews; they must

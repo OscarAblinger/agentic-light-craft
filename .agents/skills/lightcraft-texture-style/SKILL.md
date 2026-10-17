@@ -38,8 +38,8 @@ the owner - do not invent colors or rules.
   color budget; `plants` and `ores` declare `palette: exempt`. A category may
   only restrict the palette, never add colors. Pass one to the checker with
   `--category`.
-- `references/checker-policy.md` — which rules are hard failures and which are
-  advisory warnings.
+- `references/checker-policy.md` — the hard/soft rule split and the category
+  directive format.
 - `palette.txt` — the source of truth for allowed colors, with per-ramp
   `use:` / `rule:` notes. A `STATUS:` line switches enforcement on (`LOCKED`)
   or off (`UNLOCKED`, for drafting a new palette).
@@ -66,9 +66,9 @@ the owner - do not invent colors or rules.
    is shadow-only). If a color you need is not there, propose adding it to the
    right ramp with a note, and ask first.
 3. Draw through `scripts/TextureLib.java` in a generator under `generators/`
-   so colors and primitives are reused, not hand-picked per pixel. Use a
-   deterministic seed. Commit the generator together with the textures it
-   produces.
+   so colors and primitives are reused, not hand-picked per pixel. Keep
+   generation deterministic (no RNG). Commit the generator together with the
+   textures it produces.
 4. Run the checker (below) on the changed textures with the matching category.
    Fix every `[HARD]` failure.
 5. Handle the previews. The checker writes readable previews so the texture can
@@ -109,11 +109,9 @@ palette line in the output will say so.
 Exit code is `1` on any hard failure, or on any warning when `--strict` is set.
 See `references/checker-policy.md` for the exact hard/soft split.
 
-Use the preview output for review: the `*.8x.png` file shows the texture at a
-readable size and the `*.3x3.png` file shows tiling. These previews are for a
-viewer with vision (the user, or an agent that can see images) and are build
-artifacts only - mention their paths in the change report so they can be
-reviewed.
+Previews are build artifacts (not committed): `*.8x.png` shows the texture at
+a readable size, `*.3x3.png` shows tiling. Mention their paths in the change
+report so a viewer with vision can review them.
 
 ## Verification
 

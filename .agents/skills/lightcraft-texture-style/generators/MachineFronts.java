@@ -1,5 +1,4 @@
 import java.awt.image.BufferedImage;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
@@ -41,7 +40,6 @@ public final class MachineFronts {
         }
         lib = new TextureLib(Path.of(args[0]));
         Path out = Path.of(args[1]);
-        Files.createDirectories(out);
         TextureLib.save(furnace(), out.resolve("machine_front_01.png"));
         TextureLib.save(collector(), out.resolve("machine_front_02.png"));
         TextureLib.save(press(), out.resolve("machine_front_03.png"));

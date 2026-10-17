@@ -1,6 +1,5 @@
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -62,7 +61,6 @@ public final class RestyleLuxFamily {
         TextureLib lib = new TextureLib(Path.of(args[0]));
         Path src = Path.of(args[1]);
         Path out = Path.of(args[2]);
-        Files.createDirectories(out);
         for (String[] tex : TEX) {
             BufferedImage img = ImageIO.read(src.resolve(tex[0]).toFile());
             BufferedImage dst = render(lib, tex[0], img);
@@ -72,17 +70,17 @@ public final class RestyleLuxFamily {
     }
 
     /** @param name flat source file name; "raw*" uses the mild window. */
-    static BufferedImage render(TextureLib lib, String name, BufferedImage img) {
+    private static BufferedImage render(TextureLib lib, String name, BufferedImage img) {
         boolean isOre = name.equals("lapis_lux_ore.png");
         boolean isRaw = name.startsWith("raw");
-        boolean isBlock = name.endsWith("_block.png") || isOre;
+        boolean isBlock = name.endsWith("_block.png");
         BufferedImage dst = new BufferedImage(img.getWidth(), img.getHeight(),
                 BufferedImage.TYPE_INT_ARGB);
         if (isOre) {
             oreMap(img, dst, lib, MEDIUM);
             makeOpaque(dst);
         } else {
-            mapWhole(img, dst, ramp(lib, isRaw ? MILD : BRIGHT), range(img));
+            mapWhole(img, dst, ramp(lib, isRaw ? MILD : BRIGHT), range(img, false));
             if (isBlock) {
                 stripBorder(dst);
                 makeOpaque(dst);
@@ -111,7 +109,7 @@ public final class RestyleLuxFamily {
     private static void oreMap(BufferedImage img, BufferedImage dst, TextureLib lib,
                                String[] luxRampName) {
         int[] luxRamp = ramp(lib, luxRampName);
-        double[] lRange = range(img, "lux");
+        double[] lRange = range(img, true); // lux specks only
         for (int y = 0; y < img.getHeight(); y++) {
             for (int x = 0; x < img.getWidth(); x++) {
                 int argb = img.getRGB(x, y);
@@ -137,11 +135,8 @@ public final class RestyleLuxFamily {
         return (max - min) < 30 && lum(c) < 160;
     }
 
-    private static double[] range(BufferedImage img) {
-        return range(img, null);
-    }
-
-    private static double[] range(BufferedImage img, String cls) {
+    /** Luminance range of the non-transparent pixels; {@code luxOnly} skips stone. */
+    private static double[] range(BufferedImage img, boolean luxOnly) {
         double lo = 255, hi = 0;
         for (int y = 0; y < img.getHeight(); y++) {
             for (int x = 0; x < img.getWidth(); x++) {
@@ -150,10 +145,7 @@ public final class RestyleLuxFamily {
                     continue;
                 }
                 int c = argb & 0xFFFFFF;
-                if ("stone".equals(cls) && !isStone(c)) {
-                    continue;
-                }
-                if ("lux".equals(cls) && isStone(c)) {
+                if (luxOnly && isStone(c)) {
                     continue;
                 }
                 lo = Math.min(lo, lum(c));

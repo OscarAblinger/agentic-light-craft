@@ -1,23 +1,10 @@
-# LightCraft texture category: PLANTS  (tier: basic)
+# LightCraft texture category: PLANTS
 # ============================================================================
-# A category file does not define colors. It selects which ramps from
-# ../palette.txt a category may use and sets the rules for how it draws.
-# A category may only RESTRICT the palette - never invent colors - except where
-# it declares 'palette: exempt' (see plants.txt and ores.txt).
-#
-# Directive lines (read by TextureCheck --category):
-#   name:         category name (label only)
-#   tier:         basic | advanced (advanced adds extra ramps, not a new palette)
-#   allow:        comma-separated ramps from palette.txt this category may use
-#   palette:      exempt = skip palette adherence (default: enforce)
-#   opaque-only:  true = no partial transparency allowed (hard failure)
-#   tiling:       required | none (none suppresses the seam warning)
-#   max-colors:   soft limit on distinct colors per texture
-# All other lines are comments and describe human-reviewed rules.
+# Directives below are read by TextureCheck (see ../checker-policy.md);
+# everything else is human-reviewed drawing rules.
 # ============================================================================
 
 name: plants
-tier: basic
 palette: exempt
 opaque-only: false
 tiling: none

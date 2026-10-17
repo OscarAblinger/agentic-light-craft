@@ -4,17 +4,13 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Random;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Minimal shared drawing helpers for LightCraft textures.
+ * Shared palette loader and drawing helpers for LightCraft textures.
  *
  * Dependency-free (JDK only). Use this from a generator script so colors and
  * primitives are reused instead of hand-picked per pixel, which is the main
@@ -25,14 +21,16 @@ import java.util.regex.Pattern;
  *
  * Example:
  *
- *   var lib = new TextureLib(Paths.get(palettePath));
+ *   var lib = new TextureLib(Path.of(palettePath));
  *   var img = TextureLib.canvas(16, 16);
- *   lib.fill(img, "marble.light");
- *   lib.set(img, 3, 4, "marble.specular");
- *   TextureLib.clear(img, 0, 0);
- *   TextureLib.save(img, Paths.get("src/main/resources/assets/lightcraft/textures/block/my_block.png"));
+ *   lib.set(img, 0, 0, "marble.specular");
+ *   lib.set(img, 3, 4, "marble.mid");
+ *   TextureLib.save(img, Path.of("src/main/resources/assets/lightcraft/textures/block/my_block.png"));
  */
 public final class TextureLib {
+
+    private static final Pattern HEX =
+            Pattern.compile("(?i)(?<![0-9a-f])[0-9a-f]{6}(?![0-9a-f])");
 
     private final Map<String, Integer> byHex = new LinkedHashMap<>();
     private final Map<String, Integer> byName = new LinkedHashMap<>();
@@ -48,7 +46,7 @@ public final class TextureLib {
             if (lower.startsWith("status:") || lower.startsWith("title:")) {
                 continue; // file directives, not colors
             }
-            Matcher m = Pattern.compile("(?i)(?<![0-9a-f])[0-9a-f]{6}(?![0-9a-f])").matcher(line);
+            Matcher m = HEX.matcher(line);
             if (!m.find()) {
                 continue;
             }
@@ -94,11 +92,6 @@ public final class TextureLib {
         return 0xFF000000 | rgb;
     }
 
-    /** All hex colors known to the palette (without leading '#'). */
-    public Set<String> hexColors() {
-        return Collections.unmodifiableSet(byHex.keySet());
-    }
-
     /** A transparent ARGB canvas. */
     public static BufferedImage canvas(int w, int h) {
         return new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
@@ -108,57 +101,11 @@ public final class TextureLib {
         img.setRGB(x, y, color(color));
     }
 
-    /** Clear a pixel to fully transparent. */
-    public static void clear(BufferedImage img, int x, int y) {
-        img.setRGB(x, y, 0);
-    }
-
-    public void fill(BufferedImage img, String color) {
-        int argb = color(color);
-        for (int y = 0; y < img.getHeight(); y++) {
-            for (int x = 0; x < img.getWidth(); x++) {
-                img.setRGB(x, y, argb);
-            }
-        }
-    }
-
-    /**
-     * Draw a texture from an ASCII template, one character per pixel.
-     * {@code '.'} and space are transparent. Every other character must map to a
-     * palette color in {@code legend}. This keeps pixel art readable and
-     * deterministic while staying strictly palette-bound.
-     */
-    public BufferedImage fromTemplate(String[] rows, Map<Character, String> legend) {
-        int h = rows.length;
-        int w = rows[0].length();
-        BufferedImage img = canvas(w, h);
-        for (int y = 0; y < h; y++) {
-            String row = rows[y];
-            for (int x = 0; x < row.length(); x++) {
-                char c = row.charAt(x);
-                if (c == '.' || c == ' ') {
-                    continue;
-                }
-                String name = legend.get(c);
-                if (name == null) {
-                    throw new IllegalArgumentException("No legend entry for '" + c + "'");
-                }
-                img.setRGB(x, y, color(name));
-            }
-        }
-        return img;
-    }
-
     public static void save(BufferedImage img, Path out) throws IOException {
         Path parent = out.toAbsolutePath().getParent();
         if (parent != null) {
             Files.createDirectories(parent);
         }
         ImageIO.write(img, "png", out.toFile());
-    }
-
-    /** Deterministic RNG for reproducible generation. */
-    public static Random rng(long seed) {
-        return new Random(seed);
     }
 }

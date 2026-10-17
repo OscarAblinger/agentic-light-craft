@@ -2,10 +2,10 @@
 # ============================================================================
 # THE single source of truth for every color used in LightCraft textures.
 # Machines, items and material blocks draw every pixel from here. Ore stone and
-# plants are exempt and keep their own colours (see CATEGORY USAGE
-# below and references/categories/). Do not hard-code any other color anywhere
-# else. To use a new color: add it here, on the right ramp, with a note saying
-# what it is for - then draw it through scripts/TextureLib.java by name.
+# plants are exempt and keep their own colours (see references/categories/).
+# Do not hard-code any other color anywhere else. To use a new color: add it
+# here, on the right ramp, with a note saying what it is for - then draw it
+# through scripts/TextureLib.java by name.
 #
 # Each ramp carries:
 #   # use:  what the ramp is for, and where it may appear
@@ -28,11 +28,9 @@
 #   (blank)                   ignored
 #
 # NAMING
-#   "lapis" is Latin for "stone"; on its own it names no material here.
-#     lapis  = LAPIS LAZULI, the familiar blue mineral. An accent.
-#     lux    = LAPIS LUX, a mineral added by this mod. Golden and
-#              self-emissive. It is NOT a variant of lapis lazuli - the two
-#              only share the word "stone", so the ramp names are unrelated.
+#   lapis = LAPIS LAZULI, the blue accent mineral; lux = LAPIS LUX, this mod's
+#   golden, self-emissive mineral. They are unrelated - "lapis" is just Latin
+#   for "stone".
 # ============================================================================
 
 STATUS: LOCKED
@@ -103,28 +101,3 @@ FFFDF0  lux.specular
 #       recessed edge.
 1B2130  outline.deep
 2C3448  outline.mid
-
-# ============================================================================
-# CATEGORY USAGE  (summary - full rules in references/style-spec.md and
-# references/categories/)
-#
-# Categories share this one palette; they differ in RULES, not in colors.
-#
-#   items     transparent background. Dark outline so the silhouette reads at
-#             16px on any background. Low color budget (16). Light from
-#             top-left. Partial transparency allowed for deliberate soft glow.
-#   machines  opaque. Marble body + bright gold and lapis accents (no steel).
-#             Emissive lux windows; bevel shading. A machine front may carry
-#             the 1px dark recessed edge; casing/side faces stay ring-free.
-#             Faces tile seamlessly. No partial transparency.
-#   blocks    solid material blocks (storage blocks): opaque, tiling, drawn
-#             from the same ramps as machines and items.
-#   plants    PALETTE-EXEMPT - own greens/browns/petal colours; structural
-#             checks only (categories/plants.txt).
-#   ores      PALETTE-EXEMPT for the stone background (byte-identical to the
-#             source art); lux specks still come from the lux/gold ramps
-#             (categories/ores.txt).
-#
-# The intended axis is category x tier. A tier is expressed as EXTRA RAMPS
-# (e.g. an "advanced lapis lux" ramp), never as a second palette.
-# ============================================================================
