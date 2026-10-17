@@ -95,7 +95,7 @@ public final class PaletteCard {
                 entries = new ArrayList<>();
                 continue;
             }
-            String hex = line.split("\\s+")[0].replaceFirst("^#", "");
+            String hex = line.split("\\s+")[0];
             if (hex.length() != 6) {
                 System.err.println("Skipping malformed line: " + line);
                 continue;

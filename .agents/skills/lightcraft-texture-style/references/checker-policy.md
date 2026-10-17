@@ -25,25 +25,27 @@ Hard rules fail the task; soft rules warn and are reviewed by a human. With
 Partial transparency in `items` and `plants` is intentional (soft glow / soft
 edges); the warning only asks for confirmation - it is not a failure.
 
-## Category directives that change enforcement
+## Category files
 
-- `palette: exempt` - skip palette adherence and `allow:` filtering (used by
-  `plants` and `ores`; structural checks still run).
-- `opaque-only: true` - partial transparency becomes a hard failure (full
-  block categories).
-- `tiling: none` - suppress the seam warning (items, plants).
-- `max-colors: n` - per-category soft budget (items 16, machines/blocks/ores
-  24, plants 64).
+A category file (`categories/*.txt`) may only restrict `palette.txt` - never
+add colors. Directive lines (read by `TextureCheck --category`):
 
-## Heuristics that remain human-reviewed
+| Line | Effect |
+|------|--------|
+| `name:` | category label (defaults to the file name) |
+| `allow:` | comma-separated ramps from `palette.txt` the category may use |
+| `palette: exempt` | skip palette adherence and `allow:` filtering (used by `plants` and `ores`; structural checks still run) |
+| `opaque-only: true` | partial transparency becomes a hard failure (full block categories) |
+| `tiling: none` | suppress the seam warning (items, plants) |
+| `max-colors: n` | per-category soft budget (items 16, machines/blocks/ores 24, plants 64) |
 
-These cannot be checked reliably from pixels alone and stay in the style spec as
-review guidance, not as checker rules:
+Everything else in a category file is a comment: human-reviewed rules for that
+category.
 
-- Banding, pillow shading, pancake shading.
-- Necessary vs unnecessary dithering.
-- Jaggy line steps and curve quality.
-- Whether a silhouette reads at in-game size.
+## Human-reviewed heuristics
+
+Aesthetic calls cannot be checked reliably from pixels alone and stay in
+`style-spec.md` (section 3) as review guidance, not as checker rules.
 
 ## Extending the checker
 
