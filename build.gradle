@@ -100,6 +100,14 @@ neoForge {
             sourceSet(sourceSets.main)
         }
     }
+
+    // Plain JVM unit tests (src/test) run on the game classpath so they can reference
+    // Minecraft classes; the tested mod is loaded into the test JVM. Placed after the
+    // mods block because testedMod refers to the mod registered above.
+    unitTest {
+        enable()
+        testedMod = mods.lightcraft
+    }
 }
 
 // Sets up a dependency configuration called 'localRuntime'.
@@ -132,6 +140,16 @@ dependencies {
     // For more info:
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
+
+    // Unit tests (src/test) with JUnit 5; concrete versions come from the BOM.
+    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// Run the unit tests on the JUnit platform, as part of `check` and therefore `build`.
+test {
+    useJUnitPlatform()
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
