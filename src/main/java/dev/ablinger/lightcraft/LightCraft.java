@@ -5,6 +5,8 @@ import dev.ablinger.lightcraft.crop.LuxflowerBlockEntity;
 import dev.ablinger.lightcraft.crop.PetalBundles;
 import dev.ablinger.lightcraft.data.ModData;
 import dev.ablinger.lightcraft.gametest.LuxflowerGameTests;
+import dev.ablinger.lightcraft.gametest.NetworkGameTests;
+import dev.ablinger.lightcraft.radiance.PowerNetworkManager;
 import com.mojang.serialization.Codec;
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -16,6 +18,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -36,6 +39,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.tooltip.TooltipLocation;
 import net.neoforged.neoforge.event.RegisterTooltipAppendersEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -214,6 +218,10 @@ public class LightCraft {
   public static final Supplier<Consumer<GameTestHelper>> LUXFLOWER_LIGHT_EMISSION = TEST_FUNCTIONS.register("luxflower_light_emission",
       () -> LuxflowerGameTests::luxflowerLightEmission);
 
+  // Game test of the network core binding: a loaded node rebinds to its SavedData network
+  public static final Supplier<Consumer<GameTestHelper>> NODE_LOAD_REBINDS_TO_NETWORK = TEST_FUNCTIONS.register("node_load_rebinds",
+      () -> NetworkGameTests::nodeLoadRebindsToSavedDataNetwork);
+
   // The mod's own creative tab, holding every block and item of LightCraft
   public static final Supplier<CreativeModeTab> LIGHTCRAFT_TAB = CREATIVE_MODE_TABS.register("lightcraft",
       () -> CreativeModeTab.builder()
@@ -288,5 +296,17 @@ public class LightCraft {
   @SubscribeEvent
   public void onServerStarting(ServerStartingEvent event) {
     LOGGER.info("HELLO from server starting");
+  }
+
+  // The central network tick driver: block entities declare offers and requests during their
+  // own ticks, and the allocation runs once here, after every declaration of the tick is in
+  // (design report 4.12). It fires for client levels too, so only server levels are driven.
+  @SubscribeEvent
+  public void onLevelTick(LevelTickEvent.Post event) {
+    // The budget comes from the common config, which may not have been loaded yet in exotic
+    // run configs (a game test server); such a level simply shares nothing for now.
+    if (event.getLevel() instanceof ServerLevel level && Config.SPEC.isLoaded()) {
+      PowerNetworkManager.get(level).tick(Config.NETWORKS_PER_TICK_BUDGET.get());
+    }
   }
 }
