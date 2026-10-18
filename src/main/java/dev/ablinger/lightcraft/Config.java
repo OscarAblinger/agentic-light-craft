@@ -1,43 +1,96 @@
 package dev.ablinger.lightcraft;
 
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.item.Item;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.common.ModConfigSpec;
-import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
-// An example config class. This is not required, but it's a good idea to have one to keep your config organized.
-// Demonstrates how to use Neo's config APIs
+/**
+ * The mod's common config, {@code lightcraft-common.toml}.
+ *
+ * <p>It holds exactly the power system's two categories: {@code [radiance]} for the power value
+ * and its FE conversion, and {@code [network]} for topology, tiers and delivery. There is no
+ * mod-name prefix because the file itself is already per-mod.
+ *
+ * <p>Java runs the static initializers below in textual order, so the {@code push()}/{@code pop()}
+ * blocks bracket each category's keys exactly as they appear in the TOML file.
+ */
 public class Config {
-    private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
-    public static final ModConfigSpec.BooleanValue LOG_DIRT_BLOCK = BUILDER
-            .comment("Whether to log the dirt block on common setup")
-            .define("logDirtBlock", true);
+  private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
-    public static final ModConfigSpec.IntValue MAGIC_NUMBER = BUILDER
-            .comment("A magic number")
-            .defineInRange("magicNumber", 42, 0, Integer.MAX_VALUE);
+  // [radiance] - the power value and its FE conversion.
+  static {
+    BUILDER.push("radiance");
+  }
 
-    public static final ModConfigSpec.ConfigValue<String> MAGIC_NUMBER_INTRODUCTION = BUILDER
-            .comment("What you want the introduction message to be for the magic number")
-            .define("magicNumberIntroduction", "The magic number is... ");
+  /** FE per intensity of white light (#FFFFFF), the upper conversion anchor. */
+  public static final ModConfigSpec.DoubleValue WHITE_FE_PER_INTENSITY = BUILDER
+      .comment("FE per intensity of white light (#FFFFFF), the upper conversion anchor.")
+      .defineInRange("whiteFePerIntensity", 100.0, 0.0, 1_000_000.0);
 
-    // a list of strings that are treated as resource locations for items
-    public static final ModConfigSpec.ConfigValue<List<? extends String>> ITEM_STRINGS = BUILDER
-            .comment("A list of items to log on common setup.")
-            .defineListAllowEmpty("items", List.of("minecraft:iron_ingot"), () -> "", Config::validateItemName);
+  /** FE per intensity of the dim anchor (#010101), the lower conversion anchor. */
+  public static final ModConfigSpec.DoubleValue DIM_FE_PER_INTENSITY = BUILDER
+      .comment("FE per intensity of the dim anchor (#010101), the lower conversion anchor.")
+      .defineInRange("dimFePerIntensity", 0.1, 0.0, 1_000_000.0);
 
-    static final ModConfigSpec SPEC = BUILDER.build();
+  // [network] - topology, tiers and delivery. Tier values live under [network.basicTier], so
+  // future tiers add a subcategory instead of new code.
+  static {
+    BUILDER.pop();
+    BUILDER.push("network");
+    BUILDER.push("basicTier");
+  }
 
-    private static boolean validateItemName(final Object obj) {
-        return obj instanceof String itemName && BuiltInRegistries.ITEM.containsKey(Identifier.parse(itemName));
-    }
+  /** Max link distance between transport nodes (and to hubs). */
+  public static final ModConfigSpec.IntValue BASIC_TIER_TRANSPORT_LINK_DISTANCE = BUILDER
+      .comment("Max link distance between transport nodes (and to hubs).")
+      .defineInRange("transportLinkDistance", 4, 0, 256);
+
+  /** Max link distance from a transport node to any other network member. */
+  public static final ModConfigSpec.IntValue BASIC_TIER_MEMBER_LINK_DISTANCE = BUILDER
+      .comment("Max link distance from a transport node to any other network member.")
+      .defineInRange("memberLinkDistance", 4, 0, 256);
+
+  /** Max number of links per transport node. */
+  public static final ModConfigSpec.IntValue BASIC_TIER_MAX_LINKS = BUILDER
+      .comment("Max number of links per transport node.")
+      .defineInRange("maxLinks", 6, 0, 64);
+
+  /** Range within which a transport node serves a linked machine endpoint. */
+  public static final ModConfigSpec.IntValue BASIC_TIER_MAX_SEND_RANGE = BUILDER
+      .comment("Range within which a transport node serves a linked machine endpoint.")
+      .defineInRange("maxSendRange", 4, 0, 256);
+
+  /** Max FE delivered per FE node per tick; hub upgrades raise it within config bounds. */
+  public static final ModConfigSpec.IntValue BASIC_TIER_MAX_FE_PER_TICK_PER_TARGET = BUILDER
+      .comment("Max FE delivered per FE node per tick; hub upgrades raise it within config bounds.")
+      .defineInRange("maxFePerTickPerTarget", 1_000, 0, 1_000_000);
+
+  static {
+    BUILDER.pop();
+  }
+
+  /** Emitter beam range in blocks, without attenuation. */
+  public static final ModConfigSpec.IntValue EMITTER_RANGE = BUILDER
+      .comment("Emitter beam range in blocks, without attenuation.")
+      .defineInRange("emitterRange", 4, 0, 256);
+
+  /** Networks processed per tick, smoothing allocation spikes across many active networks. */
+  public static final ModConfigSpec.IntValue NETWORKS_PER_TICK_BUDGET = BUILDER
+      .comment("Networks processed per tick, smoothing allocation spikes across many active networks.")
+      .defineInRange("networksPerTickBudget", 128, 1, 1_000_000);
+
+  /** Whether the Crystal Staff requires line of sight for transport-to-transport links. */
+  public static final ModConfigSpec.BooleanValue TRANSPORT_TO_TRANSPORT_LINKS_REQUIRE_LINE_OF_SIGHT = BUILDER
+      .comment("Whether the Crystal Staff requires line of sight for transport-to-transport links.")
+      .define("transportToTransportLinksRequireLineOfSight", false);
+
+  /** Whether transport-to-member links require line of sight until a hub upgrade lifts it. */
+  public static final ModConfigSpec.BooleanValue MACHINE_LINKS_REQUIRE_LINE_OF_SIGHT_WITHOUT_UPGRADE = BUILDER
+      .comment("Whether transport-to-member links require line of sight until a hub upgrade lifts it.")
+      .define("machineLinksRequireLineOfSightWithoutUpgrade", true);
+
+  static {
+    BUILDER.pop();
+  }
+
+  static final ModConfigSpec SPEC = BUILDER.build();
 }

@@ -24,9 +24,5 @@
 
   "lightcraft.configuration.title": "LightCraft Configs",
   "lightcraft.configuration.section.lightcraft.common.toml": "LightCraft Configs",
-  "lightcraft.configuration.section.lightcraft.common.toml.title": "LightCraft Configs",
-  "lightcraft.configuration.items": "Item List",
-  "lightcraft.configuration.logDirtBlock": "Log Dirt Block",
-  "lightcraft.configuration.magicNumberIntroduction": "Magic Number Text",
-  "lightcraft.configuration.magicNumber": "Magic Number"
+  "lightcraft.configuration.section.lightcraft.common.toml.title": "LightCraft Configs"
 }

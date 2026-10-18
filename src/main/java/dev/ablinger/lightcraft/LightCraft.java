@@ -31,7 +31,6 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.tooltip.TooltipLocation;
@@ -239,11 +238,9 @@ public class LightCraft {
           })
           .build());
 
-  // Register the commonSetup method for modloading
   public LightCraft(ModContainer container, IEventBus modEventBus) {
-    container.registerConfig(ModConfig.Type.COMMON, Config.SPEC, MOD_ID);
-
-    modEventBus.addListener(this::commonSetup);
+    // No explicit name: the file becomes lightcraft-common.toml, already per-mod by itself.
+    container.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
 
     BLOCKS.register(modEventBus);
     ITEMS.register(modEventBus);
@@ -262,15 +259,6 @@ public class LightCraft {
     // points, each posting only one of them; see ModData for details.
     modEventBus.addListener(ModData::gatherDataClient);
     modEventBus.addListener(ModData::gatherDataServer);
-  }
-
-  private void commonSetup(FMLCommonSetupEvent event) {
-    LOGGER.info("HELLO FROM COMMON SETUP");
-    LOGGER.info("DIRT BLOCK >> {}", "minecraft:dirt");
-
-    LOGGER.info("{}{}", Config.MAGIC_NUMBER_INTRODUCTION.get(), Config.MAGIC_NUMBER.getAsInt());
-
-    Config.ITEM_STRINGS.get().forEach((item) -> LOGGER.info("ITEM >> {}", item));
   }
 
   // Show how many daybreaks a suncharged seed witnessed in its tooltip
