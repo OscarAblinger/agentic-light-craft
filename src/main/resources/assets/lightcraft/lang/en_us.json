@@ -19,6 +19,10 @@
   "lightcraft.tooltip.suncharge": "Witnessed %s daybreaks",
   "lightcraft.tooltip.petal_bundle": "%s petals",
   
+  "item.lightcraft.pocket_dimension": "Pocket Dimension",
+  "block.lightcraft.pocket_dimension_quartz": "Pocket Dimension Quartz",
+  "block.lightcraft.pocket_dimension_exit": "Pocket Dimension Exit",
+  
   "block.lightcraft.example_block": "Example Block",
   "item.lightcraft.example_item": "Example Item",
 
