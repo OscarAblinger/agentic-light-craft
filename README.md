@@ -41,8 +41,8 @@ folder shared by `./gradlew runServerModpack` and `./gradlew runClientModpack`, 
 those runs starts, or directly with `./gradlew syncModpackMods`. Both runs share the `run-modpack`
 game directory, so they always load the same mods and stay separate from the plain runs. Jars
 dropped into the folder by hand are kept, but `./gradlew cleanModpackMods` deletes everything in
-it. On the first server launch, accept the Minecraft EULA with `eula=true` in
-`run-modpack/eula.txt`.
+it; the standard `./gradlew clean` runs it too. On the first server launch, accept the
+Minecraft EULA with `eula=true` in `run-modpack/eula.txt`.
 
 ## Project decisions
 
