@@ -182,8 +182,9 @@ At minimum, verify:
 
 To test against other mods (e.g. JEI), declare their Maven coordinates in the `modpackMods`
 configuration in `build.gradle`; Gradle copies them into `run-modpack/mods/` before
-`./gradlew runServerModpack` / `./gradlew runClientModpack` (or via `./gradlew syncModpackMods`,
-and `./gradlew cleanModpackMods` empties the folder). The two *Modpack runs share the
+`./gradlew runServerModpack` / `./gradlew runClientModpack` (or via `./gradlew syncModpackMods`;
+`./gradlew cleanModpackMods`, which `./gradlew clean` also runs, empties the folder). The two
+*Modpack runs share the
 `run-modpack` game directory, so they always load the same mods. Pin Modrinth version IDs or
 CurseForge file IDs: plain version numbers are ambiguous across mod loaders and Minecraft
 versions. Jars can also still be placed in the folder manually.

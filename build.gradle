@@ -217,7 +217,8 @@ dependencies {
 // update the folder without launching the game. Mods are copied under a stable name: the version
 // ID/file ID (and, for CurseMaven, the project ID) suffix is stripped, so changing a version
 // above replaces the jar instead of leaving an old duplicate behind. Jars that you drop into the
-// folder yourself are never touched; `cleanModpackMods` empties the folder.
+// folder yourself are never touched; `cleanModpackMods` empties the folder and runs as part of
+// the standard `clean` task.
 def syncModpackMods = tasks.register('syncModpackMods', Copy) {
     group = 'mod development'
     description = 'Copies the mods from the modpackMods configuration into run-modpack/mods.'
@@ -232,11 +233,15 @@ def syncModpackMods = tasks.register('syncModpackMods', Copy) {
     }
 }
 
-tasks.register('cleanModpackMods', Delete) {
+def cleanModpackMods = tasks.register('cleanModpackMods', Delete) {
     group = 'mod development'
     description = 'Deletes the mods from the shared modpack run game directory.'
     delete layout.projectDirectory.dir('run-modpack/mods')
 }
+
+// A `clean` build also empties the modpack mods folder; the next *Modpack run downloads the mods
+// again.
+tasks.named('clean') { dependsOn cleanModpackMods }
 
 tasks.named('runServerModpack') { dependsOn syncModpackMods }
 tasks.named('runClientModpack') { dependsOn syncModpackMods }
