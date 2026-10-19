@@ -34,7 +34,17 @@ Common Gradle tasks:
 ./gradlew runData    # Generate data-driven resources
 ```
 
+To test LightCraft together with other mods, declare them in the `modpackMods` configuration in
+`build.gradle` (e.g. `maven.modrinth:<project-slug>:<version-id>` or
+`curse.maven:<project-id>:<file-id>`). Gradle downloads them into `run-modpack/mods/`, the mods
+folder shared by `./gradlew runServerModpack` and `./gradlew runClientModpack`, whenever one of
+those runs starts, or directly with `./gradlew syncModpackMods`. Both runs share the `run-modpack`
+game directory, so they always load the same mods and stay separate from the plain runs. Jars
+dropped into the folder by hand are kept, but `./gradlew cleanModpackMods` deletes everything in
+it. On the first server launch, accept the Minecraft EULA with `eula=true` in
+`run-modpack/eula.txt`.
+
 ## Project decisions
 
-See [research/0_basic_setup.md](research/0_basic_setup.md) for the source-of-truth project configuration.
+See [knowledge/0_basic_setup.md](knowledge/0_basic_setup.md) for the source-of-truth project configuration.
 
