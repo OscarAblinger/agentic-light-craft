@@ -28,6 +28,26 @@ sourceSets.main.resources {
 
 repositories {
     // Add here additional repositories if required by some of the dependencies below.
+
+    // Modrinth Maven serves the files of published Modrinth versions as
+    // "maven.modrinth:<project-slug>:<version-id>", where the version ID is the last path
+    // segment of the version's page URL, e.g. https://modrinth.com/mod/jei/version/7qmEzno8
+    maven {
+        name = 'Modrinth'
+        url = 'https://api.modrinth.com/maven'
+        content {
+            includeGroup 'maven.modrinth'
+        }
+    }
+
+    // Curse Maven serves CurseForge files as "curse.maven:<project-id>:<file-id>".
+    maven {
+        name = 'CurseMaven'
+        url = 'https://cursemaven.com'
+        content {
+            includeGroup 'curse.maven'
+        }
+    }
 }
 
 base {
@@ -53,9 +73,31 @@ neoForge {
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
+        // Runs the client with additional mods, to play against runServerModpack with the same
+        // mods in place. Both *Modpack runs share the run-modpack game directory, so they always
+        // load the same mods; declare them in the `modpackMods` configuration below. The shared
+        // directory keeps these runs separate from runClient/runServer.
+        clientModpack {
+            client()
+            gameDirectory = project.file('run-modpack')
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
         server {
             server()
             programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        // Starts a dedicated server with additional mods, to test LightCraft in a modpack-like
+        // setup. It shares the run-modpack game directory (and therefore all mods) with
+        // runClientModpack; declare the mods in the `modpackMods` configuration below. On the
+        // first launch the server stops once for the EULA prompt; set "eula=true" in
+        // run-modpack/eula.txt and start it again.
+        serverModpack {
+            server()
+            programArgument '--nogui'
+            gameDirectory = project.file('run-modpack')
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
@@ -116,6 +158,14 @@ neoForge {
 // "optional", meaning it will not be pulled by dependents of this mod.
 configurations {
     runtimeClasspath.extendsFrom localRuntime
+
+    // Mods that are only loaded by the *Modpack runs: declare their Maven coordinates in the
+    // `dependencies` block below. Following Gradle's configuration role model, the dependencies
+    // are declared on the `modpackMods` dependency scope, while `modpackModsClasspath` is the
+    // configuration that the syncModpackMods task resolves and copies into the mods folder of
+    // the shared run-modpack game directory.
+    def modpackMods = dependencyScope('modpackMods')
+    resolvable('modpackModsClasspath') { extendsFrom(modpackMods) }
 }
 
 dependencies {
@@ -141,11 +191,55 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
+    // Mods for the *Modpack runs, downloaded and copied into run-modpack/mods by Gradle (see the
+    // modpackMods configuration above and the syncModpackMods task below).
+    // Pin the version ID/file ID: most mods share one version number across mod loaders and
+    // Minecraft versions, which is ambiguous in Maven. Transitive dependencies are disabled so
+    // that only the published mod jars themselves end up in the mods folder.
+    modpackMods('maven.modrinth:jei:7qmEzno8') { transitive = false } // JEI 29.47.0.110 for NeoForge 26.1.2
+    modpackMods('maven.modrinth:mezzconfig:ZK7XIgVN') { transitive = false } // MezzConfig 0.6.8, required by JEI
+    modpackMods('maven.modrinth:journeymap:9CsaQLo2') { transitive = false } // JourneyMap 26.1.2-6.0.10 for NeoForge 26.1.2
+    // CurseForge files are addressed by project ID and file ID: the file ID is the number in the
+    // file's URL (curseforge.com/minecraft/mc-mods/<slug>/files/<file-id>), the project ID is
+    // shown as "Project ID" on the project page.
+    modpackMods('curse.maven:ftb-ultimine-386134:9205003') { transitive = false } // FTB Ultimine 26.1.2.6
+    modpackMods('curse.maven:ftb-library-404465:9008066') { transitive = false } // FTB Library 26.1.2.9, required by FTB Ultimine
+
     // Unit tests (src/test) with JUnit 5; concrete versions come from the BOM.
     testImplementation platform('org.junit:junit-bom:5.13.4')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
+
+// Downloads the mods listed in the `modpackMods` dependency scope and copies them into
+// run-modpack/mods/, the mods folder shared by both *Modpack runs. Both runs depend on this
+// task, so starting them downloads the mods automatically; run `syncModpackMods` on its own to
+// update the folder without launching the game. Mods are copied under a stable name: the version
+// ID/file ID (and, for CurseMaven, the project ID) suffix is stripped, so changing a version
+// above replaces the jar instead of leaving an old duplicate behind. Jars that you drop into the
+// folder yourself are never touched; `cleanModpackMods` empties the folder.
+def syncModpackMods = tasks.register('syncModpackMods', Copy) {
+    group = 'mod development'
+    description = 'Copies the mods from the modpackMods configuration into run-modpack/mods.'
+    into layout.projectDirectory.dir('run-modpack/mods')
+    from(configurations.modpackModsClasspath) {
+        // "<slug>-<version-id>.jar" (Modrinth) or "<name>-<project-id>-<file-id>.jar" (CurseMaven)
+        // both become "<name>.jar".
+        rename { name ->
+            def strippedCurseMavenSuffix = name.replaceFirst(/-\d+-\d+\.jar$/, '.jar')
+            strippedCurseMavenSuffix == name ? strippedCurseMavenSuffix.replaceFirst(/-[A-Za-z0-9]{8}\.jar$/, '.jar') : strippedCurseMavenSuffix
+        }
+    }
+}
+
+tasks.register('cleanModpackMods', Delete) {
+    group = 'mod development'
+    description = 'Deletes the mods from the shared modpack run game directory.'
+    delete layout.projectDirectory.dir('run-modpack/mods')
+}
+
+tasks.named('runServerModpack') { dependsOn syncModpackMods }
+tasks.named('runClientModpack') { dependsOn syncModpackMods }
 
 // Run the unit tests on the JUnit platform, as part of `check` and therefore `build`.
 test {
