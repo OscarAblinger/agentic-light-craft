@@ -36,9 +36,9 @@ public final class PocketDimensionGameTests {
   /**
    * Builds the cube of a fresh slot, checks its shape (quartz shell, 5x5x5 air
    * interior, exit block at the floor's center), then damages it - a hole in
-   * the wall, a block inside the interior, and stray blocks just outside the
-   * cube - and regenerates, verifying everything is restored and the strays are
-   * destroyed.
+   * the wall and stray blocks just outside the cube - and regenerates,
+   * verifying the shell and strays are restored/destroyed while a block the
+   * player built inside the interior survives.
    */
   public static void pocketCubeRegeneration(GameTestHelper helper) {
     MinecraftServer server = helper.getLevel().getServer();
@@ -67,23 +67,26 @@ public final class PocketDimensionGameTests {
       }
     }
 
-    // Damage the cube: blow a hole into a wall, place junk inside the interior
-    // and drop stray blocks just outside the cube (one next to the wall and one
-    // above the ceiling, both within the cleared margin).
+    // Damage the cube: blow a hole into a wall, build something inside the
+    // interior and drop stray blocks just outside the cube (one next to the
+    // wall and one above the ceiling, both within the cleared margin).
     BlockPos wall = new BlockPos(centerX - PocketDimensions.CUBE_RADIUS, floorY + 2, 0);
+    BlockPos built = new BlockPos(centerX, floorY + 1, 0);
     BlockPos strayNextToWall = new BlockPos(centerX - PocketDimensions.CUBE_RADIUS - 1, floorY + 2, 0);
     BlockPos strayAboveCeiling = new BlockPos(centerX, floorY + PocketDimensions.CUBE_HEIGHT, 0);
     pocket.setBlockAndUpdate(wall, Blocks.AIR.defaultBlockState());
-    pocket.setBlockAndUpdate(new BlockPos(centerX, floorY + 1, 0), Blocks.DIRT.defaultBlockState());
+    pocket.setBlockAndUpdate(built, Blocks.DIRT.defaultBlockState());
     pocket.setBlockAndUpdate(strayNextToWall, Blocks.DIRT.defaultBlockState());
     pocket.setBlockAndUpdate(strayAboveCeiling, Blocks.DIRT.defaultBlockState());
 
     PocketDimensions.regenerateCube(pocket, TEST_SLOT);
 
-    // The wall and the interior are pristine again and the strays are gone.
+    // The wall is pristine again, the strays are gone - but the interior build
+    // survives: the player's cube is their own space.
     assertBlock(helper, pocket, wall,
         LightCraft.POCKET_DIMENSION_QUARTZ.get().defaultBlockState().getBlock(), "restored wall block");
-    assertInsideSpawnIsClear(helper, pocket, centerX, floorY);
+    assertBlock(helper, pocket, built, Blocks.DIRT.defaultBlockState().getBlock(),
+        "player build inside the interior preserved");
     assertBlock(helper, pocket, strayNextToWall, Blocks.AIR.defaultBlockState().getBlock(),
         "stray block outside the cube destroyed");
     assertBlock(helper, pocket, strayAboveCeiling, Blocks.AIR.defaultBlockState().getBlock(),
