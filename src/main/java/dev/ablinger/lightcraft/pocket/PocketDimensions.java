@@ -33,11 +33,12 @@ import net.minecraft.world.phys.Vec3;
  * spawns on top of it. Cubes are {@link #SLOT_SPACING} blocks apart so future
  * cube-size upgrades have room to grow without colliding.
  *
- * <p>Regeneration ({@link #regenerateCube}) is the authority on what a cube
- * looks like: it wipes a margin around the cube (destroying anything a glitched
- * player managed to place outside) and rebuilds the walls, the air and the exit
- * block from scratch. It runs on every entry and every time a player is found
- * outside their cube, so damage can never persist.
+ * <p>Regeneration ({@link #regenerateCube}) repairs the cube: it wipes a
+ * margin around the cube (destroying anything a glitched player managed to
+ * place outside) and restores the quartz shell and the exit block if they were
+ * damaged. The interior is the player's own space and is never touched, so
+ * builds inside the cube persist between visits. It runs on every entry and
+ * every time a player is found outside their cube.
  *
  * <p>Return positions are remembered per player in {@link PocketDimensionData}
  * when they teleport in; leaving resolves back to exactly that spot, falling
@@ -110,10 +111,11 @@ public final class PocketDimensions {
   }
 
   /**
-   * Rebuilds the slot's cube from scratch: loads the chunks the area touches,
-   * destroys every block within the cube plus the surrounding margin (so any
-   * block a glitched player put outside the cube is wiped) and places the
-   * quartz walls, the air interior and the exit block again.
+   * Repairs the slot's cube: loads the chunks the area touches, destroys every
+   * block within the surrounding margin (so any block a glitched player put
+   * outside the cube is wiped) and restores the quartz shell and the exit block
+   * if they were damaged. The 5x5x5 interior is left untouched, so whatever
+   * the player built inside their cube survives every visit.
    */
   public static void regenerateCube(ServerLevel level, int slot) {
     int centerX = centerX(slot);
@@ -128,38 +130,57 @@ public final class PocketDimensions {
       }
     }
 
-    // Step 1: wipe everything in the working area, destroying stray blocks.
+    // Step 1: wipe everything in the working area except the cube itself,
+    // destroying stray blocks a glitched-out player left around the cube.
     BlockState air = Blocks.AIR.defaultBlockState();
     for (BlockPos pos : BlockPos.betweenClosed(min, max)) {
+      if (isWithinOuterCube(centerX, pos)) {
+        continue;
+      }
       if (!level.getBlockState(pos).isAir()) {
         level.setBlock(pos, air, Block.UPDATE_CLIENTS);
       }
     }
 
-    // Step 2: rebuild the cube - a one block quartz shell around a 5x5x5 air
-    // interior, with the exit block replacing the floor's center.
+    // Step 2: restore the shell - a one block quartz cube around the (player
+    // owned) interior, with the exit block replacing the floor's center. Only
+    // mismatched shell blocks are rewritten so the interior stays as the
+    // player left it.
     BlockState quartz = LightCraft.POCKET_DIMENSION_QUARTZ.get().defaultBlockState();
-    BlockState exit = LightCraft.POCKET_DIMENSION_EXIT.get().defaultBlockState();
     for (int dx = -CUBE_RADIUS; dx <= CUBE_RADIUS; dx++) {
       for (int dy = 0; dy < CUBE_HEIGHT; dy++) {
         for (int dz = -CUBE_RADIUS; dz <= CUBE_RADIUS; dz++) {
           boolean shell = Math.abs(dx) == CUBE_RADIUS || Math.abs(dz) == CUBE_RADIUS
               || dy == 0 || dy == CUBE_HEIGHT - 1;
+          if (!shell) {
+            continue;
+          }
           BlockPos pos = new BlockPos(centerX + dx, FLOOR_Y + dy, dz);
-          BlockState wanted = shell ? quartz : air;
-          if (!level.getBlockState(pos).is(wanted.getBlock())) {
-            level.setBlock(pos, wanted, Block.UPDATE_CLIENTS);
+          if (!level.getBlockState(pos).is(quartz.getBlock())) {
+            level.setBlock(pos, quartz, Block.UPDATE_CLIENTS);
           }
         }
       }
     }
+    // The spawn column (exit block and the block above it) is always cleared so
+    // the player can never be walled in on entry.
+    BlockState exit = LightCraft.POCKET_DIMENSION_EXIT.get().defaultBlockState();
     level.setBlock(new BlockPos(centerX, FLOOR_Y, 0), exit, Block.UPDATE_CLIENTS);
+    level.setBlock(new BlockPos(centerX, FLOOR_Y + 1, 0), air, Block.UPDATE_CLIENTS);
+  }
+
+  /** {@return whether the position lies inside the outer 7x7x7 cube (walls included).} */
+  private static boolean isWithinOuterCube(int centerX, BlockPos pos) {
+    int dy = pos.getY() - FLOOR_Y;
+    return Math.abs(pos.getX() - centerX) <= CUBE_RADIUS
+        && dy >= 0 && dy <= CUBE_HEIGHT - 1
+        && Math.abs(pos.getZ()) <= CUBE_RADIUS;
   }
 
   /**
    * Teleports the player into their own pocket cube, remembering where they
-   * stood so they can be returned there later. The cube is regenerated first,
-   * so every visit starts from a pristine interior.
+   * stood so they can be returned there later. The cube is repaired first, so
+   * the walls and exit block are always intact on arrival.
    */
   public static void enter(ServerPlayer player) {
     MinecraftServer server = player.level().getServer();
@@ -181,9 +202,10 @@ public final class PocketDimensions {
   public static void exit(ServerPlayer player) {
     MinecraftServer server = player.level().getServer();
     PocketDimensionData data = data(server);
-    data.forgetReturnPosition(player.getUUID());
-
+    // Resolve first, then forget: forgetting before resolving would always
+    // discard the remembered position and fall back to the respawn point.
     GlobalPos target = resolveReturnPosition(server, player);
+    data.forgetReturnPosition(player.getUUID());
     ServerLevel level = server.getLevel(target.dimension());
     teleport(player, level, Vec3.atBottomCenterOf(target.pos()));
   }
@@ -191,7 +213,7 @@ public final class PocketDimensions {
   /**
    * Returns the player into their cube without touching any remembered return
    * position. Used when a player is found outside their cube: the cube is
-   * regenerated first, so whatever they did out there is wiped on the way in.
+   * repaired first, so whatever they did outside is wiped on the way in.
    */
   public static void returnIntoCube(ServerPlayer player) {
     MinecraftServer server = player.level().getServer();
