@@ -12,7 +12,7 @@
 | Root Package Name | dev.ablinger.lightcraft |
 | Minecraft | **26.1.2** |
 | Minecraft version policy | **26.1 only initially** |
-| NeoForge | **26.1.2.107** |
+| NeoForge | **26.1.2.109** |
 | Mod loader | **NeoForge** |
 | Loader policy | **NeoForge only initially** |
 | Java | **JDK 25** |
@@ -139,6 +139,13 @@ Every external dependency must have an explicit version and a documented purpose
 
 Do not add a dependency solely for convenience when the required functionality is already available through NeoForge or vanilla Minecraft.
 
+### Modonomicon
+
+Modonomicon is a **required runtime dependency**, declared in
+`src/main/templates/META-INF/neoforge.mods.toml` and pinned by Modrinth version
+ID in `gradle.properties` (`modonomicon_version_id`). It provides the in-game
+field guide framework. The guide content itself is not implemented yet.
+
 ## Compatibility assumptions
 
 The project targets **Minecraft 26.1.x / NeoForge**.
@@ -159,6 +166,7 @@ Current compatibility notes:
 | Mekanism | **Do not require for 26.1** |
 | Applied Energistics 2 | **26.1-compatible** |
 | JEI | **26.1-compatible** |
+| Modonomicon | **26.1-compatible, required dependency** |
 | Sodium | **26.1-compatible** |
 | Iris | **26.1-compatible** |
 | Xaero's Minimap | **26.1-compatible** |
