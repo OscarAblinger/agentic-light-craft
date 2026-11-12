@@ -18,8 +18,8 @@ import net.minecraft.world.level.saveddata.SavedDataType;
  * <p>The data lives in the overworld's saved data storage (see
  * {@link PocketDimensions#data}) because it is cross-dimension bookkeeping, not
  * state of the pocket dimension level itself. 26.x saved data is codec based,
- * so the two maps are serialized through unbounded maps keyed by the player
- * UUID as a string.
+ * so the maps are serialized through unbounded maps keyed by the player UUID
+ * as a string.
  *
  * <p>Slots are the identity of a player's private cube: slot {@code n} owns the
  * cube centered at {@code n * SLOT_SPACING} on the x axis, so two players are
@@ -36,7 +36,8 @@ public class PocketDimensionData extends SavedData {
   public static final Codec<PocketDimensionData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
       Codec.INT.fieldOf("next_slot").forGetter(data -> data.nextSlot),
       Codec.unboundedMap(UUID_CODEC, Codec.INT).fieldOf("slots").forGetter(data -> data.slots),
-      Codec.unboundedMap(UUID_CODEC, GlobalPos.CODEC).fieldOf("return_positions").forGetter(data -> data.returnPositions)
+      Codec.unboundedMap(UUID_CODEC, GlobalPos.CODEC).fieldOf("return_positions").forGetter(data -> data.returnPositions),
+      Codec.unboundedMap(UUID_CODEC, Codec.INT).optionalFieldOf("sizes", Map.of()).forGetter(data -> data.sizes)
   ).apply(instance, PocketDimensionData::new));
 
   public static final SavedDataType<PocketDimensionData> TYPE = new SavedDataType<>(
@@ -50,18 +51,22 @@ public class PocketDimensionData extends SavedData {
   private final Map<UUID, Integer> slots;
   /** Player UUID to where they stood when they last teleported into their cube. */
   private final Map<UUID, GlobalPos> returnPositions;
+  /** Player UUID to interior edge length of their cube; absent means the base size. */
+  private final Map<UUID, Integer> sizes;
 
   /** Fresh data for a world that has not seen the pocket dimension yet. */
   public PocketDimensionData() {
-    this(0, Map.of(), Map.of());
+    this(0, Map.of(), Map.of(), Map.of());
   }
 
-  public PocketDimensionData(int nextSlot, Map<UUID, Integer> slots, Map<UUID, GlobalPos> returnPositions) {
+  public PocketDimensionData(int nextSlot, Map<UUID, Integer> slots, Map<UUID, GlobalPos> returnPositions,
+      Map<UUID, Integer> sizes) {
     // Defensive copies: the codec hands us immutable maps, but the game mutates
     // these as players join and teleport.
     this.nextSlot = nextSlot;
     this.slots = new HashMap<>(slots);
     this.returnPositions = new HashMap<>(returnPositions);
+    this.sizes = new HashMap<>(sizes);
   }
 
   /**
@@ -100,5 +105,33 @@ public class PocketDimensionData extends SavedData {
     if (this.returnPositions.remove(player) != null) {
       this.setDirty();
     }
+  }
+
+  /**
+   * {@return the interior edge length of the player's cube}, falling back to
+   * {@link PocketDimensions#BASE_SIZE} for players who never used an upgrade.
+   */
+  public int sizeOf(UUID player) {
+    return this.sizes.getOrDefault(player, PocketDimensions.BASE_SIZE);
+  }
+
+  /**
+   * Records a new interior edge length for the player's cube. Ignored when the
+   * size would not grow, so a stored cube can never shrink.
+   */
+  public void setSize(UUID player, int size) {
+    if (size > this.sizeOf(player)) {
+      this.sizes.put(player, size);
+      this.setDirty();
+    }
+  }
+
+  /**
+   * Records the size exactly, even downwards. Only the admin command needs
+   * this; gameplay growth goes through {@link #setSize}.
+   */
+  public void forceSize(UUID player, int size) {
+    this.sizes.put(player, size);
+    this.setDirty();
   }
 }
