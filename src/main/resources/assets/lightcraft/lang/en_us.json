@@ -22,6 +22,13 @@
   "item.lightcraft.pocket_dimension": "Pocket Dimension",
   "block.lightcraft.pocket_dimension_quartz": "Pocket Dimension Quartz",
   "block.lightcraft.pocket_dimension_exit": "Pocket Dimension Exit",
+  "item.lightcraft.pocket_dimension_upgrade_7x7x7": "Pocket Dimension Upgrade (7x7x7)",
+  "item.lightcraft.pocket_dimension_upgrade_9x9x9": "Pocket Dimension Upgrade (9x9x9)",
+  "item.lightcraft.pocket_dimension_upgrade_11x11x11": "Pocket Dimension Upgrade (11x11x11)",
+  "item.lightcraft.pocket_dimension_upgrade_15x15x15": "Pocket Dimension Upgrade (15x15x15)",
+  "lightcraft.pocket.expanded": "Your pocket cube is now %1$s x %1$s x %1$s blocks",
+  "lightcraft.pocket.command.size_set": "Set %s's pocket cube to %s",
+  "lightcraft.pocket.command.even_size": "The size must be an odd number so the cube grows symmetrically around its center (5, 7, 9, ...)",
   
   "block.lightcraft.example_block": "Example Block",
   "item.lightcraft.example_item": "Example Item",
