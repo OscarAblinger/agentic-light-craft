@@ -5,8 +5,17 @@ import dev.ablinger.lightcraft.crop.LuxflowerBlockEntity;
 import dev.ablinger.lightcraft.crop.PetalBundles;
 import dev.ablinger.lightcraft.data.ModData;
 import dev.ablinger.lightcraft.gametest.LuxflowerGameTests;
+import dev.ablinger.lightcraft.gametest.PocketDimensionGameTests;
+import dev.ablinger.lightcraft.pocket.PocketDimensionCommands;
+import dev.ablinger.lightcraft.pocket.PocketDimensionEvents;
+import dev.ablinger.lightcraft.pocket.PocketDimensionExitBlock;
+import dev.ablinger.lightcraft.pocket.PocketDimensionItem;
+import dev.ablinger.lightcraft.pocket.PocketDimensionUpgradeItem;
+import dev.ablinger.lightcraft.pocket.PocketDimensions;
 import com.mojang.serialization.Codec;
+import java.util.LinkedHashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import net.minecraft.core.component.DataComponentType;
@@ -27,6 +36,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -101,6 +111,36 @@ public class LightCraft {
   // stage on - twice as bright when fully grown (see LuxflowerBlock).
   public static final DeferredBlock<LuxflowerBlock> LUXFLOWER = BLOCKS.register("luxflower", name -> {
     return new LuxflowerBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.WHEAT)
+        .setId(ResourceKey.create(Registries.BLOCK, name)));
+  });
+
+  // Pocket dimension walls, textured like vanilla quartz. Hardness -1 makes them
+  // unbreakable in survival; the BreakEvent handler in PocketDimensionEvents
+  // also blocks creative breaking, the near-infinite explosion resistance plus
+  // that handler stop explosions, and the piston push reaction stops pistons.
+  // noLootTable() pairs with the indestructibility: there is no drop to define.
+  public static final DeferredBlock<Block> POCKET_DIMENSION_QUARTZ = BLOCKS.register("pocket_dimension_quartz", name -> {
+    return new Block(BlockBehaviour.Properties.of()
+        .mapColor(MapColor.QUARTZ)
+        .instrument(NoteBlockInstrument.BASEDRUM)
+        .sound(SoundType.STONE)
+        .strength(-1.0F, 3600000.0F)
+        .pushReaction(PushReaction.BLOCK)
+        .noLootTable()
+        .setId(ResourceKey.create(Registries.BLOCK, name)));
+  });
+
+  // The bedrock-textured exit block at the center of every pocket cube's floor.
+  // Indestructible like the walls; right-clicking it teleports the player out,
+  // see PocketDimensionExitBlock.
+  public static final DeferredBlock<PocketDimensionExitBlock> POCKET_DIMENSION_EXIT = BLOCKS.register("pocket_dimension_exit", name -> {
+    return new PocketDimensionExitBlock(BlockBehaviour.Properties.of()
+        .mapColor(MapColor.STONE)
+        .instrument(NoteBlockInstrument.BASEDRUM)
+        .sound(SoundType.STONE)
+        .strength(-1.0F, 3600000.0F)
+        .pushReaction(PushReaction.BLOCK)
+        .noLootTable()
         .setId(ResourceKey.create(Registries.BLOCK, name)));
   });
 
@@ -194,6 +234,30 @@ public class LightCraft {
         .stacksTo(64));
   });
 
+  // The pocket dimension artifact. Using it teleports the holder into their own
+  // personal pocket cube (or back out again from inside one); the cube belongs
+  // to the player, not to the item, and the item is never used up.
+  public static final DeferredItem<PocketDimensionItem> POCKET_DIMENSION_ITEM = ITEMS.register("pocket_dimension", name -> {
+    return new PocketDimensionItem(new Item.Properties()
+        .setId(ResourceKey.create(Registries.ITEM, name)));
+  });
+
+  // Pocket dimension size upgrades, one item per interior size (7x7x7, 9x9x9,
+  // 11x11x11, 15x15x15). Right-clicked inside your own cube to grow it; sizes
+  // are independent of each other and a successful upgrade consumes one item,
+  // while smaller-or-equal upgrades do nothing and keep it.
+  // See PocketDimensionUpgradeItem.
+  public static final Map<Integer, DeferredItem<PocketDimensionUpgradeItem>> POCKET_DIMENSION_UPGRADES = new LinkedHashMap<>();
+
+  static {
+    for (int size : PocketDimensions.UPGRADE_SIZES) {
+      POCKET_DIMENSION_UPGRADES.put(size, ITEMS.register("pocket_dimension_upgrade_" + size + "x" + size + "x" + size,
+          name -> new PocketDimensionUpgradeItem(new Item.Properties()
+              .setId(ResourceKey.create(Registries.ITEM, name))
+              .stacksTo(64), size)));
+    }
+  }
+
   // Block entity of the luxflower, counting the daybreaks the crop witnessed
   public static final Supplier<BlockEntityType<LuxflowerBlockEntity>> LUXFLOWER_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register("luxflower",
       () -> new BlockEntityType<>(LuxflowerBlockEntity::new, false, LUXFLOWER.get()));
@@ -213,6 +277,16 @@ public class LightCraft {
 
   public static final Supplier<Consumer<GameTestHelper>> LUXFLOWER_LIGHT_EMISSION = TEST_FUNCTIONS.register("luxflower_light_emission",
       () -> LuxflowerGameTests::luxflowerLightEmission);
+
+  // Game tests of the pocket dimension cube, see gametest package
+  public static final Supplier<Consumer<GameTestHelper>> POCKET_CUBE_REGENERATION = TEST_FUNCTIONS.register("pocket_cube_regeneration",
+      () -> PocketDimensionGameTests::pocketCubeRegeneration);
+
+  public static final Supplier<Consumer<GameTestHelper>> POCKET_SLOT_ALLOCATION = TEST_FUNCTIONS.register("pocket_slot_allocation",
+      () -> PocketDimensionGameTests::pocketSlotAllocation);
+
+  public static final Supplier<Consumer<GameTestHelper>> POCKET_CUBE_EXPANSION = TEST_FUNCTIONS.register("pocket_cube_expansion",
+      () -> PocketDimensionGameTests::pocketCubeExpansion);
 
   // The mod's own creative tab, holding every block and item of LightCraft
   public static final Supplier<CreativeModeTab> LIGHTCRAFT_TAB = CREATIVE_MODE_TABS.register("lightcraft",
@@ -235,6 +309,11 @@ public class LightCraft {
             output.accept(DOUBLE_PETAL_BUNDLE);
             output.accept(TRIPLE_PETAL_BUNDLE);
             output.accept(QUADRUPLE_PETAL_BUNDLE);
+            // The pocket dimension artifact and its size upgrades
+            output.accept(POCKET_DIMENSION_ITEM);
+            for (DeferredItem<PocketDimensionUpgradeItem> upgrade : POCKET_DIMENSION_UPGRADES.values()) {
+              output.accept(upgrade);
+            }
           })
           .build());
 
@@ -250,6 +329,13 @@ public class LightCraft {
     CREATIVE_MODE_TABS.register(modEventBus);
 
     NeoForge.EVENT_BUS.register(this);
+
+    // Guards of the pocket dimension: cube containment, block indestructibility
+    // and the monster ban; see PocketDimensionEvents.
+    NeoForge.EVENT_BUS.register(new PocketDimensionEvents());
+
+    // The /pocketdimension command; see PocketDimensionCommands.
+    NeoForge.EVENT_BUS.register(new PocketDimensionCommands());
 
     modEventBus.addListener(this::registerTooltipAppenders);
 
