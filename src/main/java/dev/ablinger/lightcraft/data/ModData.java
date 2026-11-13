@@ -48,5 +48,11 @@ public final class ModData {
     event.addProvider(new ModBlockTagsProvider(
         event.getGenerator().getPackOutput(),
         event.getLookupProvider()));
+
+    // Keep this provider last: it owns assets/lightcraft/lang/en_us.json. Any
+    // future Modonomicon book provider must be registered before it so the book
+    // translations are fed into this provider through the shared language cache.
+    event.addProvider(new ModLanguageProvider(
+        event.getGenerator().getPackOutput()));
   }
 }
