@@ -12,6 +12,7 @@ import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
@@ -129,6 +130,37 @@ public class ModRecipeProvider extends RecipeProvider {
         .unlockedBy("has_lapis_lux_ore", has(LightCraft.LAPIS_LUX_ORE_ITEM.get()))
         .group("lapis_lux")
         .save(this.output, key("lapis_lux_from_blasting_lapis_lux_ore"));
+
+    // --- light book: paper or book plus a luxflower petal or lapis lux nugget
+    // Four shapeless variants so the guide is available from either early-game
+    // paper or a vanilla book, sweetened with either of the mod's own materials.
+    this.shapeless(RecipeCategory.MISC, LightCraft.LIGHT_BOOK.get())
+        .requires(Items.PAPER)
+        .requires(LightCraft.LUXFLOWER_PETAL.get())
+        .group("light_book")
+        .unlockedBy("has_luxflower_petal", has(LightCraft.LUXFLOWER_PETAL.get()))
+        .save(this.output, key("light_book_from_paper_and_luxflower_petal"));
+
+    this.shapeless(RecipeCategory.MISC, LightCraft.LIGHT_BOOK.get())
+        .requires(Items.PAPER)
+        .requires(LightCraft.LAPIS_LUX_NUGGET_ITEM.get())
+        .group("light_book")
+        .unlockedBy("has_lapis_lux_nugget", has(LightCraft.LAPIS_LUX_NUGGET_ITEM.get()))
+        .save(this.output, key("light_book_from_paper_and_lapis_lux_nugget"));
+
+    this.shapeless(RecipeCategory.MISC, LightCraft.LIGHT_BOOK.get())
+        .requires(Items.BOOK)
+        .requires(LightCraft.LUXFLOWER_PETAL.get())
+        .group("light_book")
+        .unlockedBy("has_luxflower_petal", has(LightCraft.LUXFLOWER_PETAL.get()))
+        .save(this.output, key("light_book_from_book_and_luxflower_petal"));
+
+    this.shapeless(RecipeCategory.MISC, LightCraft.LIGHT_BOOK.get())
+        .requires(Items.BOOK)
+        .requires(LightCraft.LAPIS_LUX_NUGGET_ITEM.get())
+        .group("light_book")
+        .unlockedBy("has_lapis_lux_nugget", has(LightCraft.LAPIS_LUX_NUGGET_ITEM.get()))
+        .save(this.output, key("light_book_from_book_and_lapis_lux_nugget"));
   }
 
   /** Hands the data generator a provider once registry lookups are ready. */

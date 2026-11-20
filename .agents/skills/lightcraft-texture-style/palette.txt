@@ -101,3 +101,21 @@ FFFDF0  lux.specular
 #       recessed edge.
 1B2130  outline.deep
 2C3448  outline.mid
+
+# --- Book --------------------------------------------------------------------
+# use:  the light book's cover, spine and pages. The owner exempted the book
+#       parts from the core palette; these are the exact colours of the chosen
+#       Gilded Marble Tome concept. Gold/lapis/lux accents still use the ramps
+#       above and remain enforced by the items category.
+# rule: only for book parts (cover, spine, pages, outline); accents stay on the
+#       core ramps above.
+[book]
+2A2118  book.outline          # warm dark outline for the book silhouette
+8C7F68  book.spine.shadow     # deepest spine bevel
+B7A88B  book.spine            # spine body
+D8CCB2  book.spine.highlight  # lit spine edge
+C9C0AC  book.cover.shadow     # cover falloff / bottom-right bevel
+E9E3D4  book.cover            # ivory marble cover body
+F8F4E9  book.cover.highlight  # top-left cover bevel
+D9C9A6  book.page.shadow      # page block shadow
+FFFDF2  book.page.highlight   # page edge highlight

@@ -5,7 +5,7 @@
 # ============================================================================
 
 name: items
-allow: marble, lapis, gold, lux, outline
+allow: marble, lapis, gold, lux, outline, book
 opaque-only: false
 tiling: none
 max-colors: 16
@@ -35,7 +35,9 @@ max-colors: 16
 #            marble for stone parts, gold for metal parts, lapis for gems, and
 #            lux for anything that emits (for example a lapis-lux ingot).
 #            Luxflower petals, seeds and petal bundles are plant items - they
-#            use the plants category instead.
+#            use the plants category instead. The light book's cover, spine
+#            and pages use the [book] ramp instead; its accents still use the
+#            core ramps above.
 #
 # TILING    Not applicable - items do not tile (directive: tiling: none).
 # ============================================================================

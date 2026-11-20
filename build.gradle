@@ -176,7 +176,7 @@ dependencies {
     // We add the full version to localRuntime, not runtimeOnly, so that we do not publish a dependency on it
     // localRuntime "mezz.jei:jei-${mc_version}-neoforge:${jei_version}"
 
-    // Modonomicon provides the in-game field guide framework and is a required
+    // Modonomicon provides the in-game light book framework and is a required
     // dependency for users (see neoforge.mods.toml).
     implementation "maven.modrinth:modonomicon:${modonomicon_version_id}"
 
