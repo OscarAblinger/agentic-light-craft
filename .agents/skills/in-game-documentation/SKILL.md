@@ -21,7 +21,7 @@ quick overview of what was added.
 
 ## Golden rules
 
-1. **Behaviour is the truth.** Documentation describes behaviour; it never drives gameplay changes, and gameplay is never changed to make documentation accurate. Never change behaviour to match docs, and never change docs to cover behaviour that has not been properly read in code.
+1. **Behaviour is the truth.** Documentation describes behaviour; it never drives gameplay changes, and gameplay is never changed to make documentation accurate. Never change behaviour to match docs, and never change docs to cover behaviour that has not been properly read in code. This skill covers documentation only; no functionality changes outside documentation functionality.
 2. **No guessing.** Read the relevant code properly before writing or judging anything. If unsure what something does, or whether to include something, ask the user. Otherwise decide inclusion yourself.
 3. **Highest documentation quality over speed.** Only the pre-push check may be quick and may be wrong; the manual audits are the source of truth for quality.
 
@@ -48,6 +48,14 @@ Regenerate with:
 ```bash
 ./gradlew runData
 ```
+
+## Page types
+
+- A writing reference for choosing page types lives at
+  `references/page-types.md`. There is no hand-maintained page-type catalog in
+  this project: the Modonomicon datagen/compiler is the catalog; an invalid type
+  or field fails the datagen compile. The writing reference describes page
+  choices only, with optional jar-based drift detection.
 
 ## Reading order map
 
