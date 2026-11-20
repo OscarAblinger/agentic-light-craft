@@ -144,7 +144,7 @@ Do not add a dependency solely for convenience when the required functionality i
 Modonomicon is a **required runtime dependency**, declared in
 `src/main/templates/META-INF/neoforge.mods.toml` and pinned by Modrinth version
 ID in `gradle.properties` (`modonomicon_version_id`). It provides the in-game
-field guide framework. The guide content itself is not implemented yet.
+light book framework. The light book content itself is not implemented yet.
 
 ## Compatibility assumptions
 

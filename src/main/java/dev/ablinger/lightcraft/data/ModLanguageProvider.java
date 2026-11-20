@@ -52,6 +52,9 @@ public class ModLanguageProvider extends AbstractModonomiconLanguageProvider {
     this.add("item.lightcraft.triple_petal_bundle", "Triple Petal Bundle");
     this.add("item.lightcraft.quadruple_petal_bundle", "Quadruple Petal Bundle");
 
+    // In-game documentation
+    this.add("item.lightcraft.light_book", "Light Book");
+
     // Tooltips
     this.add("lightcraft.tooltip.suncharge", "Witnessed %s daybreaks");
     this.add("lightcraft.tooltip.petal_bundle", "%s petals");

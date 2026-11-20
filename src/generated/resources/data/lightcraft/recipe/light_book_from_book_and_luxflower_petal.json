@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "group": "light_book",
+  "ingredients": [
+    "minecraft:book",
+    "lightcraft:luxflower_petal"
+  ],
+  "result": {
+    "id": "lightcraft:light_book"
+  }
+}

@@ -7,6 +7,7 @@ import dev.ablinger.lightcraft.data.ModData;
 import dev.ablinger.lightcraft.gametest.LuxflowerGameTests;
 import dev.ablinger.lightcraft.gametest.NetworkGameTests;
 import dev.ablinger.lightcraft.radiance.PowerNetworkManager;
+import com.klikli_dev.modonomicon.item.ModonomiconCustomItemBase;
 import com.mojang.serialization.Codec;
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -17,6 +18,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.BlockItem;
@@ -52,6 +54,10 @@ import org.slf4j.LoggerFactory;
 public class LightCraft {
   // Define mod id in a common place for everything to reference
   public static final String MOD_ID = "lightcraft";
+  // The Modonomicon book opened by the light book item. The book itself is
+  // generated separately; keeping the id here lets the item and book datagen
+  // agree on the same book.
+  public static final Identifier LIGHT_BOOK_ID = Identifier.fromNamespaceAndPath(MOD_ID, "light_book");
   // Directly reference a slf4j logger
   public static final Logger LOGGER = LoggerFactory.getLogger(LightCraft.class);
 
@@ -106,6 +112,20 @@ public class LightCraft {
   public static final DeferredBlock<LuxflowerBlock> LUXFLOWER = BLOCKS.register("luxflower", name -> {
     return new LuxflowerBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.WHEAT)
         .setId(ResourceKey.create(Registries.BLOCK, name)));
+  });
+
+  // The light book, LightCraft's in-game documentation. This is a custom
+  // Modonomicon book item: right-clicking opens the book whose id is stored in
+  // LIGHT_BOOK_ID. The book content is generated separately, so until it exists
+  // using the item only logs that the book is missing.
+  //
+  // Registered before every other item and added first to the creative tab so
+  // it is the first LightCraft entry in NEI/JEI-style item lists (JEI's default
+  // sort uses the creative menu order within a mod).
+  public static final DeferredItem<ModonomiconCustomItemBase> LIGHT_BOOK = ITEMS.register("light_book", name -> {
+    return new ModonomiconCustomItemBase(LIGHT_BOOK_ID, new Item.Properties()
+        .setId(ResourceKey.create(Registries.ITEM, name))
+        .stacksTo(1));
   });
 
   // Item entries for the ore variants
@@ -228,6 +248,8 @@ public class LightCraft {
           .title(Component.translatable("itemGroup.lightcraft"))
           .icon(() -> new ItemStack(LUXFLOWER_PETAL.get()))
           .displayItems((parameters, output) -> {
+            // The in-game documentation book
+            output.accept(LIGHT_BOOK);
             // Lapis lux materials and blocks
             output.accept(LAPIS_LUX_ORE_ITEM);
             output.accept(RAW_LAPIS_LUX_BLOCK_ITEM);

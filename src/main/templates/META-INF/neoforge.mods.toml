@@ -80,7 +80,7 @@ A Minecraft mod for NeoForge 26.1.x.
     ordering="NONE"
     side="BOTH"
 
-# Modonomicon provides the in-game field guide framework used by LightCraft.
+# Modonomicon provides the in-game light book framework used by LightCraft.
 [[dependencies.${mod_id}]]
     modId="modonomicon"
     type="required"
