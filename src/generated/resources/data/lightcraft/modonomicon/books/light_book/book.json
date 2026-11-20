@@ -1,0 +1,17 @@
+{
+  "allow_open_book_with_invalid_links": false,
+  "creative_tab": "modonomicon:modonomicon",
+  "custom_book_item": "lightcraft:light_book",
+  "default_allow_page_split": false,
+  "default_auto_scale": true,
+  "description": "",
+  "display_mode": "node",
+  "font": "modonomicon:default",
+  "generate_book_item": false,
+  "model": "modonomicon:modonomicon_purple",
+  "name": "book.lightcraft.light_book.name",
+  "page_display_mode": "double_page",
+  "show_recently_unlocked": true,
+  "tooltip": "book.lightcraft.light_book.tooltip",
+  "turn_page_sound": "modonomicon:turn_page"
+}

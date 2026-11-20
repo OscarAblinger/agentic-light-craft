@@ -1,0 +1,24 @@
+{
+  "type": "modonomicon:content",
+  "background": {
+    "height": 26,
+    "sprite": "modonomicon:modonomicon/themes/default/node/entry_backgrounds/square_gold",
+    "width": 26
+  },
+  "category": "lightcraft:getting_started",
+  "condition": {
+    "type": "modonomicon:none"
+  },
+  "description": "book.lightcraft.light_book.getting_started.welcome.description",
+  "icon": {
+    "id": "lightcraft:light_book"
+  },
+  "id": "lightcraft:getting_started/welcome",
+  "marker_condition": {
+    "type": "modonomicon:none"
+  },
+  "name": "book.lightcraft.light_book.getting_started.welcome.name",
+  "sort_number": 0,
+  "x": 0,
+  "y": 0
+}

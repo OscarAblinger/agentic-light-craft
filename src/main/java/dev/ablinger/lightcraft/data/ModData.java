@@ -1,5 +1,10 @@
 package dev.ablinger.lightcraft.data;
 
+import com.klikli_dev.modonomicon.api.datagen.LanguageProviderCache;
+import com.klikli_dev.modonomicon.api.datagen.NeoBookProvider;
+import com.klikli_dev.modonomicon.api.datagen.NeoResearchProvider;
+import com.klikli_dev.modonomicon.api.datagen.research.ResearchCache;
+import dev.ablinger.lightcraft.data.book.LightBook;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 /**
@@ -37,22 +42,32 @@ public final class ModData {
   }
 
   private static void addProviders(GatherDataEvent event) {
+    var packOutput = event.getGenerator().getPackOutput();
+
     event.addProvider(new ModRecipeProvider.Runner(
-        event.getGenerator().getPackOutput(),
+        packOutput,
         event.getLookupProvider()));
 
     event.addProvider(new ModLootTableProvider(
-        event.getGenerator().getPackOutput(),
+        packOutput,
         event.getLookupProvider()));
 
     event.addProvider(new ModBlockTagsProvider(
-        event.getGenerator().getPackOutput(),
+        packOutput,
         event.getLookupProvider()));
 
-    // Keep this provider last: it owns assets/lightcraft/lang/en_us.json. Any
-    // future Modonomicon book provider must be registered before it so the book
-    // translations are fed into this provider through the shared language cache.
-    event.addProvider(new ModLanguageProvider(
-        event.getGenerator().getPackOutput()));
+    // The book and language providers share a cache so book translations are
+    // merged into the single assets/lightcraft/lang/en_us.json file. Modonomicon
+    // also requires a research provider, even when no research is authored.
+    var langCache = new LanguageProviderCache("en_us");
+    var researchCache = new ResearchCache();
+
+    event.addProvider(NeoBookProvider.of(event, langCache, researchCache,
+        new LightBook()));
+    event.addProvider(NeoResearchProvider.of(event, langCache, researchCache));
+
+    // Keep this provider last: it owns assets/lightcraft/lang/en_us.json, so it
+    // must run after the book provider has filled the shared language cache.
+    event.addProvider(new ModLanguageProvider(packOutput, langCache));
   }
 }
