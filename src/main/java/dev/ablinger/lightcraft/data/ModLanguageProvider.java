@@ -55,6 +55,36 @@ public class ModLanguageProvider extends AbstractModonomiconLanguageProvider {
     // In-game documentation
     this.add("item.lightcraft.light_book", "Light Book");
 
+    // Pocket dimension book pages
+    this.add("book.lightcraft.light_book.pocket_dimension.name", "Pocket Dimension");
+    this.add("book.lightcraft.light_book.pocket_dimension.pocket_dimension.name", "Pocket Dimension");
+    this.add("book.lightcraft.light_book.pocket_dimension.pocket_dimension.description", "Your private pocket cube.");
+    this.add("book.lightcraft.light_book.pocket_dimension.pocket_dimension.overview.title", "The Pocket Dimension");
+    this.add("book.lightcraft.light_book.pocket_dimension.pocket_dimension.overview.text",
+        "Every player owns a private pocket cube: a small quartz room that is theirs alone. "
+            + "The base pocket cube holds a 5x5x5 interior wrapped in a one-block-thick "
+            + "indestructible quartz shell, for an outer cube of 7x7x7, and a bedrock-textured "
+            + "exit block sits at the center of the floor, where the player always spawns. "
+            + "All monsters are blocked from spawning in the pocket dimension, so the room "
+            + "stays a safe, quiet place to build.");
+    this.add("book.lightcraft.light_book.pocket_dimension.pocket_dimension.using.title", "Entering and Leaving");
+    this.add("book.lightcraft.light_book.pocket_dimension.pocket_dimension.using.text",
+        "Use the Pocket Dimension item to teleport into your own cube; the item is never "
+            + "consumed. Use the item again - or right-click the bedrock exit block inside "
+            + "the cube - to teleport back to where you entered, falling back to the respawn "
+            + "point if that spot is no longer free.");
+    this.add("book.lightcraft.light_book.pocket_dimension_growth.name", "Growing the Pocket Dimension");
+    this.add("book.lightcraft.light_book.pocket_dimension_growth.pocket_dimension_growth.name", "Growing the Pocket Dimension");
+    this.add("book.lightcraft.light_book.pocket_dimension_growth.pocket_dimension_growth.description", "How to grow your private pocket cube.");
+    this.add("book.lightcraft.light_book.pocket_dimension_growth.pocket_dimension_growth.growth.title", "Growing Your Pocket Cube");
+    this.add("book.lightcraft.light_book.pocket_dimension_growth.pocket_dimension_growth.growth.text",
+        "While standing inside your pocket cube, use a Pocket Dimension Upgrade item to grow "
+            + "it: the (7x7x7), (9x9x9), (11x11x11) or (15x15x15) upgrade expands the interior "
+            + "accordingly. Upgrades are independent of each other, so the (15x15x15) upgrade "
+            + "works straight from the base 5x5x5 cube. A successful upgrade consumes one "
+            + "upgrade item - creative mode is exempt - and the new room keeps everything you "
+            + "built. Using an upgrade for the same or a smaller size does nothing.");
+
     // Tooltips
     this.add("lightcraft.tooltip.suncharge", "Witnessed %s daybreaks");
     this.add("lightcraft.tooltip.petal_bundle", "%s petals");

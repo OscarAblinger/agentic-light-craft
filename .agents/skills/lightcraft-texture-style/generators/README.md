@@ -19,6 +19,14 @@ java -cp build/texture-gen MachineFronts \
 - `MachineFronts.java` — draws the three style anchors in `../examples/`
   (`machine_front_01..03.png`). Regenerating must reproduce them byte-for-byte.
   Check with `--category machines`.
+- `PocketDimensionItem.java` — draws the pocket dimension item texture
+  (`textures/item/pocket_dimension.png`). Regenerating must reproduce it
+  byte-for-byte. Check with `--category items`.
+- `PocketDimensionUpgrades.java` — draws the four pocket dimension upgrade
+  item textures (`textures/item/pocket_dimension_upgrade_7x7x7.png`,
+  `_9x9x9`, `_11x11x11`, `_15x15x15`): the pocket dimension cube with a gold
+  ring in the lapis window that grows with the upgrade size. Regenerating must
+  reproduce them byte-for-byte. Check with `--category items`.
 - `RestyleLuxFamily.java` — restyles the lapis lux family (`lapis_lux`,
   `lapis_lux_nugget`, `raw_lapis_lux`, `raw_lapis_lux_block`,
   `lapis_lux_ingot_block`, `lapis_lux_ore` — six files). It reads the

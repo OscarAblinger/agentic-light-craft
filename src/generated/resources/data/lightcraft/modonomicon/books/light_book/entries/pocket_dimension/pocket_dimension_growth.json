@@ -1,0 +1,24 @@
+{
+  "type": "modonomicon:content",
+  "background": {
+    "height": 26,
+    "sprite": "modonomicon:modonomicon/themes/default/node/entry_backgrounds/square_gold",
+    "width": 26
+  },
+  "category": "lightcraft:pocket_dimension",
+  "condition": {
+    "type": "modonomicon:none"
+  },
+  "description": "book.lightcraft.light_book.pocket_dimension.pocket_dimension_growth.description",
+  "icon": {
+    "id": "lightcraft:pocket_dimension"
+  },
+  "id": "lightcraft:pocket_dimension/pocket_dimension_growth",
+  "marker_condition": {
+    "type": "modonomicon:none"
+  },
+  "name": "book.lightcraft.light_book.pocket_dimension.pocket_dimension_growth.name",
+  "sort_number": 1,
+  "x": 2,
+  "y": 0
+}

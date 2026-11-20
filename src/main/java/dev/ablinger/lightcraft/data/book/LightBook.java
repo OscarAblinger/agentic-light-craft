@@ -3,6 +3,7 @@ package dev.ablinger.lightcraft.data.book;
 import com.klikli_dev.modonomicon.api.datagen.SingleBookSubProvider;
 import com.klikli_dev.modonomicon.api.datagen.book.BookModel;
 import dev.ablinger.lightcraft.LightCraft;
+import dev.ablinger.lightcraft.data.book.pocketdimension.PocketDimensionCategory;
 
 /**
  * Datagen definition of the Light Book, LightCraft's in-game documentation.
@@ -34,6 +35,7 @@ public class LightBook extends SingleBookSubProvider {
   @Override
   protected void generateCategories() {
     this.add(new GettingStartedCategory(this).generate());
+    this.add(new PocketDimensionCategory(this).generate());
   }
 
   @Override
